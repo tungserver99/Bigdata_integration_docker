@@ -1,0 +1,705 @@
+{
+  "paragraphs": [
+    {
+      "text": "%livy.pyspark\nfrom pyspark.sql import SparkSession\nfrom pyspark.ml import Pipeline\nfrom pyspark.ml.feature import CountVectorizer,StringIndexer, RegexTokenizer,StopWordsRemover\nfrom pyspark.sql.functions import col, udf,regexp_replace,isnull\nfrom pyspark.sql.types import StringType,IntegerType\nfrom pyspark.ml.classification import NaiveBayes, RandomForestClassifier, LogisticRegression, DecisionTreeClassifier, GBTClassifier\nfrom pyspark.ml.evaluation import MulticlassClassificationEvaluator, BinaryClassificationEvaluator",
+      "user": "anonymous",
+      "dateUpdated": "2022-06-25 21:59:00.436",
+      "progress": 0,
+      "config": {
+        "colWidth": 12.0,
+        "fontSize": 9.0,
+        "enabled": true,
+        "results": {},
+        "editorSetting": {
+          "language": "python",
+          "editOnDblClick": false,
+          "completionKey": "TAB",
+          "completionSupport": true
+        },
+        "editorMode": "ace/mode/python"
+      },
+      "settings": {
+        "params": {},
+        "forms": {}
+      },
+      "results": {
+        "code": "SUCCESS",
+        "msg": [
+          {
+            "type": "HTML",
+            "data": "\u003chr/\u003eSpark Application Id: application_1656193753050_0001\u003cbr/\u003eSpark WebUI: \u003ca href\u003d\"http://master:8088/proxy/application_1656193753050_0001/\"\u003ehttp://master:8088/proxy/application_1656193753050_0001/\u003c/a\u003e"
+          }
+        ]
+      },
+      "apps": [],
+      "runtimeInfos": {},
+      "progressUpdateIntervalMs": 500,
+      "jobName": "paragraph_1654767647880_6730240",
+      "id": "paragraph_1654767647880_6730240",
+      "dateCreated": "2022-06-09 09:40:47.880",
+      "dateStarted": "2022-06-25 21:59:00.533",
+      "dateFinished": "2022-06-25 22:01:40.181",
+      "status": "FINISHED"
+    },
+    {
+      "text": "%livy.pyspark\ndf \u003d spark.read.format(\"csv\").option(\"inferSchema\", True).option(\"header\", True).option(\"delimiter\",\"\\t\").load(\"/data/Dataset_articles.csv\").dropna()\ndf.show(10)\ndf.count()",
+      "user": "anonymous",
+      "dateUpdated": "2022-06-25 23:37:23.408",
+      "progress": 96,
+      "config": {
+        "editorSetting": {
+          "language": "python",
+          "editOnDblClick": false,
+          "completionKey": "TAB",
+          "completionSupport": true
+        },
+        "colWidth": 12.0,
+        "editorMode": "ace/mode/python",
+        "fontSize": 9.0,
+        "results": {},
+        "enabled": true
+      },
+      "settings": {
+        "params": {},
+        "forms": {}
+      },
+      "results": {
+        "code": "SUCCESS",
+        "msg": [
+          {
+            "type": "TEXT",
+            "data": "+---+--------------------+--------------------+--------------------+--------------------+--------------------+---------------+------------+--------------------+\n|_c0|                 URL|               Title|             Summary|            Contents|                Date|      Author(s)|    Category|                Tags|\n+---+--------------------+--------------------+--------------------+--------------------+--------------------+---------------+------------+--------------------+\n|  0|https://laodong.v...|\"Thông tin “Ngọc ...|Lâm Đồng - Lãnh đ...|Những ngày vừa qu...|Thứ sáu, 20/05/20...|   Phương Nhiên|Bất động sản|[\u0027Lâm Đồng\u0027, \u0027Ngọ...|\n|  1|https://laodong.v...|Lỗ hổng trong việ...|TPHCM - Việc khôn...|\"Theo thông tin t...|Thứ sáu, 20/05/20...|       Gia Miêu|Bất động sản|[\u0027Thủ Thiêm\u0027, \u0027Đấ...|\n|  2|https://laodong.v...|Sớm hoàn thiện cá...|Hiện trên địa bàn...|\"CNLĐ mong muốn s...|Thứ sáu, 20/05/20...|  NGUYỄN TRƯỜNG|Bất động sản|[\u0027Dự án\u0027, \u0027Nhà ở ...|\n|  3|https://laodong.v...|Chi tiết hồ sơ ho...|Hoàn công nhà ở v...|Hoàn công nhà ở l...|Thứ sáu, 20/05/20...|Kim Nhung (T/H)|Bất động sản|[\u0027Giấy phép xây d...|\n|  4|https://laodong.v...|Khởi tạo không gi...|Có rất nhiều lý d...|Đi dọc đường Lê V...|Thứ năm, 19/05/20...|   Huyền Nguyễn|Bất động sản|    [\u0027An Quý Villa\u0027]|\n|  5|https://laodong.v...|\"Cận cảnh Khu đô ...|Khu đô thị Thanh ...|Những ngày qua, đ...|Thứ năm, 19/05/20...|     CAO NGUYÊN|Bất động sản|[\u0027Khu đô thị\u0027, \u0027X...|\n|  6|https://laodong.v...|Tiếp tục cưỡng ch...|Khánh Hòa - Bên c...|Ngày 19.5, UBND p...|Thứ năm, 19/05/20...|       Hữu Long|Bất động sản|[\u0027Khánh Hòa\u0027, \u0027Nh...|\n|  7|https://laodong.v...|Nguyên tắc thiết ...|Dưới đây là nguyê...|Nhà ở công vụ là ...|Thứ năm, 19/05/20...|Kim Nhung (T/H)|Bất động sản|[\u0027Nhà công vụ\u0027, \u0027...|\n|  8|https://laodong.v...|Thanh Hoá: Dừng đ...|Thanh Hoá - Dự án...|\"Từ \"\"rút ống thở...|Thứ tư, 18/05/202...|      Xuân Hùng|Bất động sản|[\u0027Đất vàng\u0027, \u0027Tha...|\n|  9|https://laodong.v...|Kinh nghiệm thuê ...|Chuyến du lịch sắ...|Villa là gì? Vill...|Thứ tư, 18/05/202...| Minh Huy (T/H)|Bất động sản|[\u0027Du lịch\u0027, \u0027Tiết...|\n+---+--------------------+--------------------+--------------------+--------------------+--------------------+---------------+------------+--------------------+\nonly showing top 10 rows\n\n291894"
+          },
+          {
+            "type": "HTML",
+            "data": "\u003chr/\u003eSpark Application Id: application_1656193753050_0001\u003cbr/\u003eSpark WebUI: \u003ca href\u003d\"http://master:8088/proxy/application_1656193753050_0001/\"\u003ehttp://master:8088/proxy/application_1656193753050_0001/\u003c/a\u003e"
+          }
+        ]
+      },
+      "apps": [],
+      "runtimeInfos": {},
+      "progressUpdateIntervalMs": 500,
+      "jobName": "paragraph_1655222266607_1289469866",
+      "id": "paragraph_1655222266607_1289469866",
+      "dateCreated": "2022-06-14 15:57:46.607",
+      "dateStarted": "2022-06-25 23:37:23.550",
+      "dateFinished": "2022-06-25 23:43:23.816",
+      "status": "FINISHED"
+    },
+    {
+      "text": "%md\n# Thống kê các chủ ",
+      "user": "anonymous",
+      "dateUpdated": "2022-06-25 23:29:43.999",
+      "progress": 0,
+      "config": {
+        "tableHide": false,
+        "editorSetting": {
+          "language": "markdown",
+          "editOnDblClick": true,
+          "completionKey": "TAB",
+          "completionSupport": false
+        },
+        "colWidth": 12.0,
+        "editorMode": "ace/mode/markdown",
+        "fontSize": 9.0,
+        "editorHide": true,
+        "results": {},
+        "enabled": true
+      },
+      "settings": {
+        "params": {},
+        "forms": {}
+      },
+      "results": {
+        "code": "SUCCESS",
+        "msg": [
+          {
+            "type": "HTML",
+            "data": "\u003cdiv class\u003d\"markdown-body\"\u003e\n\u003ch1\u003eThống kê các chủ đề\u003c/h1\u003e\n\u003c/div\u003e"
+          }
+        ]
+      },
+      "apps": [],
+      "runtimeInfos": {},
+      "progressUpdateIntervalMs": 500,
+      "jobName": "paragraph_1656199772238_424128523",
+      "id": "paragraph_1656199772238_424128523",
+      "dateCreated": "2022-06-25 23:29:32.427",
+      "dateStarted": "2022-06-25 23:29:43.967",
+      "dateFinished": "2022-06-25 23:29:44.304",
+      "status": "FINISHED"
+    },
+    {
+      "text": "%livy.pyspark\ndf_category \u003d df.groupBy(\"Category\").count()\ndf_category.show(20, False)\nprint(df_category.count())",
+      "user": "anonymous",
+      "dateUpdated": "2022-06-25 23:41:17.431",
+      "progress": 100,
+      "config": {
+        "editorSetting": {
+          "language": "python",
+          "editOnDblClick": false,
+          "completionKey": "TAB",
+          "completionSupport": true
+        },
+        "colWidth": 12.0,
+        "editorMode": "ace/mode/python",
+        "fontSize": 9.0,
+        "results": {},
+        "enabled": true,
+        "tableHide": false
+      },
+      "settings": {
+        "params": {},
+        "forms": {}
+      },
+      "results": {
+        "code": "SUCCESS",
+        "msg": [
+          {
+            "type": "TEXT",
+            "data": "+--------------------------+-----+\n|Category                  |count|\n+--------------------------+-----+\n|Du lịch                   |8    |\n|Tin địa phương            |23   |\n|Quỹ TLV                   |20   |\n|Tản mạn - Chuyện dọc đường|1    |\n|Thông tin tiện ích        |97   |\n|Video                     |1    |\n|Thời sự                   |15804|\n|Tin hoạt động             |168  |\n|Thế giới                  |27838|\n|Văn hóa - Giải trí        |18039|\n|Tin bài xem thêm          |12   |\n|Công đoàn                 |21904|\n|Kinh doanh                |26974|\n|Tin bài liên quan         |2    |\n|Người Việt tử tế          |3    |\n|Bất động sản              |6264 |\n|Sự kiện Bình luận         |65   |\n|Diễn đàn                  |306  |\n|Media                     |7249 |\n|Lao Động \u0026 Đời sống       |234  |\n+--------------------------+-----+\nonly showing top 20 rows\n\n39"
+          },
+          {
+            "type": "HTML",
+            "data": "\u003chr/\u003eSpark Application Id: application_1656193753050_0001\u003cbr/\u003eSpark WebUI: \u003ca href\u003d\"http://master:8088/proxy/application_1656193753050_0001/\"\u003ehttp://master:8088/proxy/application_1656193753050_0001/\u003c/a\u003e"
+          }
+        ]
+      },
+      "apps": [],
+      "runtimeInfos": {},
+      "progressUpdateIntervalMs": 500,
+      "jobName": "paragraph_1656003845848_38069389",
+      "id": "paragraph_1656003845848_38069389",
+      "dateCreated": "2022-06-23 17:04:05.853",
+      "dateStarted": "2022-06-25 23:41:18.991",
+      "dateFinished": "2022-06-25 23:46:40.751",
+      "status": "FINISHED"
+    },
+    {
+      "text": "%livy.pyspark\ndf_category.createOrReplaceTempView(\"Category\")",
+      "user": "anonymous",
+      "dateUpdated": "2022-06-25 23:19:23.508",
+      "progress": 0,
+      "config": {
+        "editorSetting": {
+          "language": "python",
+          "editOnDblClick": false,
+          "completionKey": "TAB",
+          "completionSupport": true
+        },
+        "colWidth": 12.0,
+        "editorMode": "ace/mode/python",
+        "fontSize": 9.0,
+        "results": {},
+        "enabled": true
+      },
+      "settings": {
+        "params": {},
+        "forms": {}
+      },
+      "results": {
+        "code": "SUCCESS",
+        "msg": [
+          {
+            "type": "HTML",
+            "data": "\u003chr/\u003eSpark Application Id: application_1656193753050_0001\u003cbr/\u003eSpark WebUI: \u003ca href\u003d\"http://master:8088/proxy/application_1656193753050_0001/\"\u003ehttp://master:8088/proxy/application_1656193753050_0001/\u003c/a\u003e"
+          }
+        ]
+      },
+      "apps": [],
+      "runtimeInfos": {},
+      "progressUpdateIntervalMs": 500,
+      "jobName": "paragraph_1656010275663_556621137",
+      "id": "paragraph_1656010275663_556621137",
+      "dateCreated": "2022-06-23 18:51:15.664",
+      "dateStarted": "2022-06-25 23:25:29.463",
+      "dateFinished": "2022-06-25 23:27:11.359",
+      "status": "FINISHED"
+    },
+    {
+      "text": "%livy.sql\nSELECT Category, count FROM Category",
+      "user": "anonymous",
+      "dateUpdated": "2022-07-13 04:31:06.196",
+      "progress": 0,
+      "config": {
+        "editorSetting": {
+          "language": "sql",
+          "editOnDblClick": false,
+          "completionKey": "TAB",
+          "completionSupport": true
+        },
+        "colWidth": 12.0,
+        "editorMode": "ace/mode/sql",
+        "fontSize": 9.0,
+        "results": {
+          "0": {
+            "graph": {
+              "mode": "multiBarChart",
+              "height": 300.0,
+              "optionOpen": false,
+              "setting": {
+                "table": {
+                  "tableGridState": {},
+                  "tableColumnTypeState": {
+                    "names": {
+                      "Category": "string",
+                      "count": "string"
+                    },
+                    "updated": false
+                  },
+                  "tableOptionSpecHash": "[{\"name\":\"useFilter\",\"valueType\":\"boolean\",\"defaultValue\":false,\"widget\":\"checkbox\",\"description\":\"Enable filter for columns\"},{\"name\":\"showPagination\",\"valueType\":\"boolean\",\"defaultValue\":false,\"widget\":\"checkbox\",\"description\":\"Enable pagination for better navigation\"},{\"name\":\"showAggregationFooter\",\"valueType\":\"boolean\",\"defaultValue\":false,\"widget\":\"checkbox\",\"description\":\"Enable a footer for displaying aggregated values\"}]",
+                  "tableOptionValue": {
+                    "useFilter": false,
+                    "showPagination": false,
+                    "showAggregationFooter": false
+                  },
+                  "updated": false,
+                  "initialized": false
+                },
+                "stackedAreaChart": {
+                  "rotate": {
+                    "degree": "-45"
+                  },
+                  "xLabelStatus": "default"
+                },
+                "lineChart": {
+                  "rotate": {
+                    "degree": "-45"
+                  },
+                  "xLabelStatus": "default"
+                },
+                "multiBarChart": {
+                  "rotate": {
+                    "degree": "-45"
+                  },
+                  "xLabelStatus": "default"
+                }
+              },
+              "commonSetting": {},
+              "keys": [
+                {
+                  "name": "Category",
+                  "index": 0.0,
+                  "aggr": "sum"
+                }
+              ],
+              "groups": [],
+              "values": [
+                {
+                  "name": "count",
+                  "index": 1.0,
+                  "aggr": "sum"
+                }
+              ]
+            },
+            "helium": {}
+          }
+        },
+        "enabled": true
+      },
+      "settings": {
+        "params": {},
+        "forms": {}
+      },
+      "results": {
+        "code": "SUCCESS",
+        "msg": [
+          {
+            "type": "TABLE",
+            "data": "Category\tcount\nDu l\\u1ECBch\t8\nTin \\u0111\\u1ECBa ph\\u01B0\\u01A1ng\t23\nQu\\u1EF9 TLV\t20\nT\\u1EA3n m\\u1EA1n - Chuy\\u1EC7n ...\t1\nTh\\u00F4ng tin ti\\u1EC7n \\u00EDch\t97\nVideo\t1\nTh\\u1EDDi s\\u1EF1\t15804\nTin ho\\u1EA1t \\u0111\\u1ED9ng\t168\nTh\\u1EBF gi\\u1EDBi\t27838\nV\\u0103n h\\u00F3a - Gi\\u1EA3i tr\\u00ED\t18039\nTin b\\u00E0i xem th\\u00EAm\t12\nC\\u00F4ng \\u0111o\\u00E0n\t21904\nKinh doanh\t26974\nTin b\\u00E0i li\\u00EAn quan\t2\nNg\\u01B0\\u1EDDi Vi\\u1EC7t t\\u1EED t\\u1EBF\t3\nB\\u1EA5t \\u0111\\u1ED9ng s\\u1EA3n\t6264\nS\\u1EF1 ki\\u1EC7n B\\u00ECnh lu\\u1EADn\t65\nDi\\u1EC5n \\u0111\\u00E0n\t306\nMedia\t7249\nLao \\u0110\\u1ED9ng \u0026 \\u0110\\u1EDDi s\\u1ED1ng\t234\nT\\u1EA5m L\\u00F2ng V\\u00E0ng\t1575\nC\\u00F4ng ngh\\u1EC7\t1319\nLao \\u0110\\u1ED9ng cu\\u1ED1i tu\\u1EA7n\t626\nPh\\u00F3ng s\\u1EF1 - \\u0110i\\u1EC1u tra\t2\nB\\u1EA1n \\u0111\\u1ECDc\t8270\nPh\\u00E1p lu\\u1EADt\t27361\nGi\\u00E1o d\\u1EE5c\t21817\nLao \\u0110\\u1ED9ng Xu\\u00E2n\t2\nS\\u1ED5 tay kinh t\\u1EBF\t8\nL\\u01B0u tr\\u1EEF\t396\nXe +\t3917\nPh\\u00F3ng s\\u1EF1\t36\nGia \\u0111\\u00ECnh - H\\u00F4n nh\\u00E2n\t4381\nX\\u00E3 h\\u1ED9i\t55700\nTh\\u00F4ng tin doanh n...\t16\nS\\u1EE9c kh\\u1ECFe\t11489\nTin t\\u1EE9c vi\\u1EC7c l\\u00E0m\t176\nTin b\\u00E0i n\\u1ED5i b\\u1EADt\t1\nTh\\u1EC3 thao\t29790"
+          },
+          {
+            "type": "HTML",
+            "data": "\u003chr/\u003eSpark Application Id: application_1656193753050_0001\u003cbr/\u003eSpark WebUI: \u003ca href\u003d\"http://master:8088/proxy/application_1656193753050_0001/\"\u003ehttp://master:8088/proxy/application_1656193753050_0001/\u003c/a\u003e"
+          }
+        ]
+      },
+      "apps": [],
+      "runtimeInfos": {},
+      "progressUpdateIntervalMs": 500,
+      "jobName": "paragraph_1656012164765_1159746336",
+      "id": "paragraph_1656012164765_1159746336",
+      "dateCreated": "2022-06-23 19:22:44.766",
+      "dateStarted": "2022-06-25 22:08:20.512",
+      "dateFinished": "2022-06-25 22:09:45.592",
+      "status": "FINISHED"
+    },
+    {
+      "text": "%livy.pyspark\nfrom pyspark.sql.functions import col\n# lọc ra các chủ đề có nhiều hơn 100 bài báo\nlist_category_100 \u003d df_category.where(col(\"count\") \u003e 100).select(\"Category\").rdd.flatMap(lambda x: x).collect()\nprint(list_category_100)\nprint(len(list_category_100))",
+      "user": "anonymous",
+      "dateUpdated": "2022-07-10 17:19:05.111",
+      "progress": 100,
+      "config": {
+        "editorSetting": {
+          "language": "python",
+          "editOnDblClick": false,
+          "completionKey": "TAB",
+          "completionSupport": true
+        },
+        "colWidth": 12.0,
+        "editorMode": "ace/mode/python",
+        "fontSize": 9.0,
+        "results": {},
+        "enabled": true
+      },
+      "settings": {
+        "params": {},
+        "forms": {}
+      },
+      "results": {
+        "code": "SUCCESS",
+        "msg": [
+          {
+            "type": "TEXT",
+            "data": "[\u0027Thời sự\u0027, \u0027Tin hoạt động\u0027, \u0027Thế giới\u0027, \u0027Văn hóa - Giải trí\u0027, \u0027Công đoàn\u0027, \u0027Kinh doanh\u0027, \u0027Bất động sản\u0027, \u0027Diễn đàn\u0027, \u0027Media\u0027, \u0027Lao Động \u0026 Đời sống\u0027, \u0027Tấm Lòng Vàng\u0027, \u0027Công nghệ\u0027, \u0027Lao Động cuối tuần\u0027, \u0027Bạn đọc\u0027, \u0027Pháp luật\u0027, \u0027Giáo dục\u0027, \u0027Lưu trữ\u0027, \u0027Xe +\u0027, \u0027Gia đình - Hôn nhân\u0027, \u0027Xã hội\u0027, \u0027Sức khỏe\u0027, \u0027Tin tức việc làm\u0027, \u0027Thể thao\u0027]\n23"
+          },
+          {
+            "type": "HTML",
+            "data": "\u003chr/\u003eSpark Application Id: application_1656193753050_0001\u003cbr/\u003eSpark WebUI: \u003ca href\u003d\"http://master:8088/proxy/application_1656193753050_0001/\"\u003ehttp://master:8088/proxy/application_1656193753050_0001/\u003c/a\u003e"
+          }
+        ]
+      },
+      "apps": [],
+      "runtimeInfos": {},
+      "progressUpdateIntervalMs": 500,
+      "jobName": "paragraph_1656194515457_1449999210",
+      "id": "paragraph_1656194515457_1449999210",
+      "dateCreated": "2022-06-25 22:01:55.457",
+      "dateStarted": "2022-06-25 23:43:24.210",
+      "dateFinished": "2022-06-25 23:47:56.886",
+      "status": "FINISHED"
+    },
+    {
+      "text": "%livy.pyspark\n# Giữ lại các văn bản nằm trong  các chủ đề có nhiều hơn 100 bài báo\ndf_100 \u003d df.where(df.Category.isin(list_category_100))\ndf_100.coalesce(1).write.mode(\"overwrite\").format(\"csv\").option(\"header\", \"true\").option(\"delimiter\",\"\\t\").save(\"/data/Dataset_category_100\")",
+      "user": "anonymous",
+      "dateUpdated": "2022-06-25 22:42:46.880",
+      "progress": 0,
+      "config": {
+        "editorSetting": {
+          "language": "python",
+          "editOnDblClick": false,
+          "completionKey": "TAB",
+          "completionSupport": true
+        },
+        "colWidth": 12.0,
+        "editorMode": "ace/mode/python",
+        "fontSize": 9.0,
+        "results": {},
+        "enabled": true
+      },
+      "settings": {
+        "params": {},
+        "forms": {}
+      },
+      "results": {
+        "code": "SUCCESS",
+        "msg": [
+          {
+            "type": "HTML",
+            "data": "\u003chr/\u003eSpark Application Id: application_1656193753050_0001\u003cbr/\u003eSpark WebUI: \u003ca href\u003d\"http://master:8088/proxy/application_1656193753050_0001/\"\u003ehttp://master:8088/proxy/application_1656193753050_0001/\u003c/a\u003e"
+          }
+        ]
+      },
+      "apps": [],
+      "runtimeInfos": {},
+      "progressUpdateIntervalMs": 500,
+      "jobName": "paragraph_1656001448854_604806877",
+      "id": "paragraph_1656001448854_604806877",
+      "dateCreated": "2022-06-23 16:24:08.854",
+      "dateStarted": "2022-06-25 22:42:47.352",
+      "dateFinished": "2022-06-25 22:45:28.268",
+      "status": "FINISHED"
+    },
+    {
+      "text": "%livy.pyspark\ndf_100 \u003d spark.read.format(\"csv\").option(\"inferSchema\", True).option(\"header\", True).option(\"delimiter\",\"\\t\").load(\"/data/Dataset_category_100\")\ndf_100.show(20)\ndf_100.count()",
+      "user": "anonymous",
+      "dateUpdated": "2022-06-25 23:49:23.583",
+      "progress": 0,
+      "config": {
+        "editorSetting": {
+          "language": "python",
+          "editOnDblClick": false,
+          "completionKey": "TAB",
+          "completionSupport": true
+        },
+        "colWidth": 12.0,
+        "editorMode": "ace/mode/python",
+        "fontSize": 9.0,
+        "results": {},
+        "enabled": true
+      },
+      "settings": {
+        "params": {},
+        "forms": {}
+      },
+      "results": {
+        "code": "SUCCESS",
+        "msg": [
+          {
+            "type": "TEXT",
+            "data": "+---+--------------------+--------------------+--------------------+--------------------+--------------------+----------------+------------+--------------------+\n|_c0|                 URL|               Title|             Summary|            Contents|                Date|       Author(s)|    Category|                Tags|\n+---+--------------------+--------------------+--------------------+--------------------+--------------------+----------------+------------+--------------------+\n|  0|https://laodong.v...|\"Thông tin “Ngọc ...|Lâm Đồng - Lãnh đ...|Những ngày vừa qu...|Thứ sáu, 20/05/20...|    Phương Nhiên|Bất động sản|[\u0027Lâm Đồng\u0027, \u0027Ngọ...|\n|  1|https://laodong.v...|Lỗ hổng trong việ...|TPHCM - Việc khôn...|\"Theo thông tin t...|Thứ sáu, 20/05/20...|        Gia Miêu|Bất động sản|[\u0027Thủ Thiêm\u0027, \u0027Đấ...|\n|  2|https://laodong.v...|Sớm hoàn thiện cá...|Hiện trên địa bàn...|\"CNLĐ mong muốn s...|Thứ sáu, 20/05/20...|   NGUYỄN TRƯỜNG|Bất động sản|[\u0027Dự án\u0027, \u0027Nhà ở ...|\n|  3|https://laodong.v...|Chi tiết hồ sơ ho...|Hoàn công nhà ở v...|Hoàn công nhà ở l...|Thứ sáu, 20/05/20...| Kim Nhung (T/H)|Bất động sản|[\u0027Giấy phép xây d...|\n|  4|https://laodong.v...|Khởi tạo không gi...|Có rất nhiều lý d...|Đi dọc đường Lê V...|Thứ năm, 19/05/20...|    Huyền Nguyễn|Bất động sản|    [\u0027An Quý Villa\u0027]|\n|  5|https://laodong.v...|\"Cận cảnh Khu đô ...|Khu đô thị Thanh ...|Những ngày qua, đ...|Thứ năm, 19/05/20...|      CAO NGUYÊN|Bất động sản|[\u0027Khu đô thị\u0027, \u0027X...|\n|  6|https://laodong.v...|Tiếp tục cưỡng ch...|Khánh Hòa - Bên c...|Ngày 19.5, UBND p...|Thứ năm, 19/05/20...|        Hữu Long|Bất động sản|[\u0027Khánh Hòa\u0027, \u0027Nh...|\n|  7|https://laodong.v...|Nguyên tắc thiết ...|Dưới đây là nguyê...|Nhà ở công vụ là ...|Thứ năm, 19/05/20...| Kim Nhung (T/H)|Bất động sản|[\u0027Nhà công vụ\u0027, \u0027...|\n|  8|https://laodong.v...|Thanh Hoá: Dừng đ...|Thanh Hoá - Dự án...|\"Từ \"\"rút ống thở...|Thứ tư, 18/05/202...|       Xuân Hùng|Bất động sản|[\u0027Đất vàng\u0027, \u0027Tha...|\n|  9|https://laodong.v...|Kinh nghiệm thuê ...|Chuyến du lịch sắ...|Villa là gì? Vill...|Thứ tư, 18/05/202...|  Minh Huy (T/H)|Bất động sản|[\u0027Du lịch\u0027, \u0027Tiết...|\n| 10|https://laodong.v...|Giá trị các khu đ...|Đồng Nai - Trong ...|Theo đó, ở TP.Biê...|Thứ tư, 18/05/202...|    HÀ ANH CHIẾN|Bất động sản|[\u0027Đồng Nai\u0027, \u0027Biê...|\n| 11|https://laodong.v...|Lời giải thích từ...|TPHCM - Nhiều ngu...|\"Nội dung văn bản...|Thứ tư, 18/05/202...|        Gia Miêu|Bất động sản|[\u0027Thủ Thiêm\u0027, \u0027Đấ...|\n| 12|https://laodong.v...|Dự án 33 tỉ của T...|Lâm Đồng - Dự án ...|\"Ngày 18.5, bà Đà...|Thứ tư, 18/05/202...|        Hữu Long|Bất động sản|[\u0027Lâm Đồng\u0027, \u0027Bảo...|\n| 13|https://laodong.v...|Đồng Nai bàn giao...|Đồng Nai - Ngày 1...|Trong đó, phần di...|Thứ tư, 18/05/202...|    HÀ ANH CHIẾN|Bất động sản|[\u0027bất động sản sâ...|\n| 14|https://laodong.v...|1.000 gian hàng t...|Đà Nẵng - Ngày 18...|Triễn lãm lần này...|Thứ tư, 18/05/202...|      THUỲ TRANG|Bất động sản|[\u0027Đà Nẵng\u0027, \u0027Triể...|\n| 15|https://laodong.v...|Chưa cưỡng chế đư...|TPHCM - Hai doanh...|\"Tài khoản không ...|Thứ tư, 18/05/202...|        Gia Miêu|Bất động sản|[\u0027Thủ Thiêm\u0027, \u0027Đấ...|\n| 16|https://laodong.v...|Bán nhà, đất “hai...|Việc đầu cơ, thổi...|\"Bán nhà, đất “ha...|Thứ tư, 18/05/202...|      Cao Nguyên|Bất động sản|[\u0027Chế tài\u0027, \u0027Trốn...|\n| 17|https://laodong.v...|Nhà ở xã hội vẫn ...|Nhu cầu nhà ở của...|Nhu cầu lớn Là cô...|Thứ tư, 18/05/202...|         LAN NHI|Bất động sản|    [\u0027Nhà ở xã hội\u0027]|\n| 18|https://laodong.v...|Thủ tục thay đổi ...|Khi thay đổi địa ...|Theo Khoản 1 Điều...|Thứ tư, 18/05/202...|Phương Duy (T/H)|Bất động sản|[\u0027Giấy chứng nhận...|\n| 19|https://laodong.v...|“Chóng mặt” vì gi...|Hà Nội - Giá nhà ...|\"Nhiễu loạn giá  ...|Thứ ba, 17/05/202...|         Lan Nhi|Bất động sản|[\u0027Giá nhà ở\u0027, \u0027Gi...|\n+---+--------------------+--------------------+--------------------+--------------------+--------------------+----------------+------------+--------------------+\nonly showing top 20 rows\n\n291597"
+          },
+          {
+            "type": "HTML",
+            "data": "\u003chr/\u003eSpark Application Id: application_1656193753050_0001\u003cbr/\u003eSpark WebUI: \u003ca href\u003d\"http://master:8088/proxy/application_1656193753050_0001/\"\u003ehttp://master:8088/proxy/application_1656193753050_0001/\u003c/a\u003e"
+          }
+        ]
+      },
+      "apps": [],
+      "runtimeInfos": {},
+      "progressUpdateIntervalMs": 500,
+      "jobName": "paragraph_1656004022422_1972468143",
+      "id": "paragraph_1656004022422_1972468143",
+      "dateCreated": "2022-06-23 17:07:02.423",
+      "dateStarted": "2022-06-25 23:49:23.934",
+      "dateFinished": "2022-06-25 23:53:38.230",
+      "status": "FINISHED"
+    },
+    {
+      "text": "%md\n# Chia dữ liệu train test   ",
+      "user": "anonymous",
+      "dateUpdated": "2022-06-25 23:30:19.264",
+      "progress": 0,
+      "config": {
+        "tableHide": false,
+        "editorSetting": {
+          "language": "markdown",
+          "editOnDblClick": true,
+          "completionKey": "TAB",
+          "completionSupport": false
+        },
+        "colWidth": 12.0,
+        "editorMode": "ace/mode/markdown",
+        "fontSize": 9.0,
+        "editorHide": true,
+        "results": {},
+        "enabled": true
+      },
+      "settings": {
+        "params": {},
+        "forms": {}
+      },
+      "results": {
+        "code": "SUCCESS",
+        "msg": [
+          {
+            "type": "HTML",
+            "data": "\u003cdiv class\u003d\"markdown-body\"\u003e\n\u003ch1\u003eChia dữ liệu train test\u003c/h1\u003e\n\u003c/div\u003e"
+          }
+        ]
+      },
+      "apps": [],
+      "runtimeInfos": {},
+      "progressUpdateIntervalMs": 500,
+      "jobName": "paragraph_1656199800977_174670803",
+      "id": "paragraph_1656199800977_174670803",
+      "dateCreated": "2022-06-25 23:30:00.977",
+      "dateStarted": "2022-06-25 23:30:19.259",
+      "dateFinished": "2022-06-25 23:30:19.455",
+      "status": "FINISHED"
+    },
+    {
+      "text": "%livy.pyspark\ntrain_df, test_df \u003d df_100.randomSplit([0.8, 0.2])",
+      "user": "anonymous",
+      "dateUpdated": "2022-06-25 23:10:46.851",
+      "progress": 0,
+      "config": {
+        "editorSetting": {
+          "language": "python",
+          "editOnDblClick": false,
+          "completionKey": "TAB",
+          "completionSupport": true
+        },
+        "colWidth": 12.0,
+        "editorMode": "ace/mode/python",
+        "fontSize": 9.0,
+        "results": {},
+        "enabled": true
+      },
+      "settings": {
+        "params": {},
+        "forms": {}
+      },
+      "results": {
+        "code": "SUCCESS",
+        "msg": [
+          {
+            "type": "HTML",
+            "data": "\u003chr/\u003eSpark Application Id: application_1656193753050_0001\u003cbr/\u003eSpark WebUI: \u003ca href\u003d\"http://master:8088/proxy/application_1656193753050_0001/\"\u003ehttp://master:8088/proxy/application_1656193753050_0001/\u003c/a\u003e"
+          }
+        ]
+      },
+      "apps": [],
+      "runtimeInfos": {},
+      "progressUpdateIntervalMs": 500,
+      "jobName": "paragraph_1656013087537_435276209",
+      "id": "paragraph_1656013087537_435276209",
+      "dateCreated": "2022-06-23 19:38:07.538",
+      "dateStarted": "2022-06-25 23:10:47.737",
+      "dateFinished": "2022-06-25 23:13:19.722",
+      "status": "FINISHED"
+    },
+    {
+      "text": "%livy.pyspark\ntest_df.coalesce(1).write.mode(\"overwrite\").format(\"csv\").option(\"header\", \"true\").option(\"delimiter\",\"\\t\").save(\"/data/test/test_raw\")\ntrain_df.coalesce(1).write.mode(\"overwrite\").format(\"csv\").option(\"header\", \"true\").option(\"delimiter\",\"\\t\").save(\"/data/train/train_raw\")",
+      "user": "anonymous",
+      "dateUpdated": "2022-06-25 23:10:49.840",
+      "progress": 50,
+      "config": {
+        "editorSetting": {
+          "language": "python",
+          "editOnDblClick": false,
+          "completionKey": "TAB",
+          "completionSupport": true
+        },
+        "colWidth": 12.0,
+        "editorMode": "ace/mode/python",
+        "fontSize": 9.0,
+        "results": {},
+        "enabled": true
+      },
+      "settings": {
+        "params": {},
+        "forms": {}
+      },
+      "results": {
+        "code": "SUCCESS",
+        "msg": [
+          {
+            "type": "HTML",
+            "data": "\u003chr/\u003eSpark Application Id: application_1656193753050_0001\u003cbr/\u003eSpark WebUI: \u003ca href\u003d\"http://master:8088/proxy/application_1656193753050_0001/\"\u003ehttp://master:8088/proxy/application_1656193753050_0001/\u003c/a\u003e"
+          }
+        ]
+      },
+      "apps": [],
+      "runtimeInfos": {},
+      "progressUpdateIntervalMs": 500,
+      "jobName": "paragraph_1654767647880_794923797",
+      "id": "paragraph_1654767647880_794923797",
+      "dateCreated": "2022-06-09 09:40:47.880",
+      "dateStarted": "2022-06-25 23:13:13.488",
+      "dateFinished": "2022-06-25 23:18:23.099",
+      "status": "FINISHED"
+    },
+    {
+      "text": "%livy.pyspark\n# Kiểm tra số lượng chủ đề của tập train và test  \ntrain_df \u003d spark.read.format(\"csv\").option(\"inferSchema\", True).option(\"header\", True).option(\"delimiter\",\"\\t\").load(\"/data/train/train_raw\")\ntrain_category \u003d  train_df.groupBy(\"Category\").count()\nprint(\"Số lượng chủ đề trong tập train: \"+ str(train_category.count())) \n\ntest_df \u003d spark.read.format(\"csv\").option(\"inferSchema\", True).option(\"header\", True).option(\"delimiter\",\"\\t\").load(\"/data/test/test_raw\")\ntest_category \u003d test_df.groupBy(\"Category\").count()\nprint(\"Số lượng chủ đề trong tập test: \"+ str(test_category.count()))",
+      "user": "anonymous",
+      "dateUpdated": "2022-06-26 00:49:40.418",
+      "progress": 99,
+      "config": {
+        "editorSetting": {
+          "language": "python",
+          "editOnDblClick": false,
+          "completionKey": "TAB",
+          "completionSupport": true
+        },
+        "colWidth": 12.0,
+        "editorMode": "ace/mode/python",
+        "fontSize": 9.0,
+        "results": {},
+        "enabled": true
+      },
+      "settings": {
+        "params": {},
+        "forms": {}
+      },
+      "results": {
+        "code": "SUCCESS",
+        "msg": [
+          {
+            "type": "TEXT",
+            "data": "Số lượng chủ đề trong tập train: 23\nSố lượng chủ đề trong tập test: 23"
+          },
+          {
+            "type": "HTML",
+            "data": "\u003chr/\u003eSpark Application Id: application_1656193753050_0002\u003cbr/\u003eSpark WebUI: \u003ca href\u003d\"http://master:8088/proxy/application_1656193753050_0002/\"\u003ehttp://master:8088/proxy/application_1656193753050_0002/\u003c/a\u003e"
+          }
+        ]
+      },
+      "apps": [],
+      "runtimeInfos": {},
+      "progressUpdateIntervalMs": 500,
+      "jobName": "paragraph_1656203614664_1095372015",
+      "id": "paragraph_1656203614664_1095372015",
+      "dateCreated": "2022-06-26 00:33:34.664",
+      "dateStarted": "2022-06-26 00:49:40.647",
+      "dateFinished": "2022-06-26 00:53:54.671",
+      "status": "FINISHED"
+    },
+    {
+      "text": "%livy.pyspark\ntest_df \u003d spark.read.format(\"csv\").option(\"inferSchema\", True).option(\"header\", True).option(\"delimiter\",\"\\t\").load(\"/data/test/test_raw\")\ntest_df.show()\ntest_df.count()",
+      "user": "anonymous",
+      "dateUpdated": "2022-06-25 23:33:24.583",
+      "progress": 88,
+      "config": {
+        "editorSetting": {
+          "language": "scala",
+          "editOnDblClick": false,
+          "completionKey": "TAB",
+          "completionSupport": true
+        },
+        "colWidth": 12.0,
+        "editorMode": "ace/mode/scala",
+        "fontSize": 9.0,
+        "results": {},
+        "enabled": true
+      },
+      "settings": {
+        "params": {},
+        "forms": {}
+      },
+      "results": {
+        "code": "SUCCESS",
+        "msg": [
+          {
+            "type": "TEXT",
+            "data": "+-----+--------------------+--------------------+--------------------+--------------------+--------------------+----------------+------------+--------------------+\n|  _c0|                 URL|               Title|             Summary|            Contents|                Date|       Author(s)|    Category|                Tags|\n+-----+--------------------+--------------------+--------------------+--------------------+--------------------+----------------+------------+--------------------+\n|10015|https://laodong.v...|Hỗ trợ người lao ...|Ngày 29.6, Thủ tư...|Đổi mới mạnh mẽ c...|Thứ ba, 29/06/202...|Theo chinhphu.vn|     Thời sự|[\u0027Người lao động\u0027...|\n|10023|https://laodong.v...|Đưa Hải Phòng trở...|Chủ tịch Quốc hội...|Tại kỳ họp thứ nh...|Thứ ba, 29/06/202...|        Mai Dung|     Thời sự|[\u0027Hải Phòng\u0027, \u0027Ch...|\n|10024|https://laodong.v...|Lần đầu tiên Bến ...|Tại phiên khai mạ...|Tại kỳ họp, các đ...|Thứ ba, 29/06/202...|         Kỳ Quan|     Thời sự|[\u0027Bến Tre\u0027, \u0027UBND...|\n|10030|https://laodong.v...|Ninh Thuận có tân...|Tại phiên làm việ...|Theo đó, ông Phạm...|Thứ ba, 29/06/202...|       Huỳnh Hải|     Thời sự|[\u0027Ninh thuận\u0027, \u0027S...|\n|10031|https://laodong.v...|Báo cáo Chính phủ...|Tại Phiên họp toà...|Sáng 29.6, tại Nh...|Thứ ba, 29/06/202...|       Phạm Đông|     Thời sự|[\u0027Quốc hội\u0027, \u0027Bảo...|\n|10040|https://laodong.v...|Việt - Lào tiếp t...|Chiều 28.6, tại T...|\"Tại cuộc hội kiế...|Thứ hai, 28/06/20...|        Thanh Hà|     Thời sự|[\u0027Việt Nam\u0027, \u0027Lào...|\n|10047|https://laodong.v...|Tổng Bí thư Nguyễ...|Sáng 28.6, ngay s...|Trong bầu không k...|Thứ hai, 28/06/20...|      Hải Nguyễn|     Thời sự|[\u0027Việt Nam\u0027, \u0027Tổn...|\n|10049|https://laodong.v...|Hình ảnh lễ đón T...|Chủ tịch nước Ngu...|Sáng 28.6, Tổng B...|Thứ hai, 28/06/20...|      Hải Nguyễn|     Thời sự|[\u0027Việt Nam\u0027, \u0027Tổn...|\n|10053|https://laodong.v...|Tổng Bí thư, Chủ ...|Sáng 28.6, Tổng B...|\"Đây là chuyến th...|Thứ hai, 28/06/20...|      Khánh Minh|     Thời sự|[\u0027Việt Nam\u0027, \u0027Tổn...|\n|10059|https://laodong.v...|Nghệ An: Chuyển t...|6 tháng đầu năm, ...|Theo Sở Kế hoạch ...|Chủ nhật, 27/06/2...|       QUANG ĐẠI|     Thời sự|[\u0027Nghệ An\u0027, \u0027Bí t...|\n|10063|https://laodong.v...|Tổng Bí thư, Chủ ...|Chuyến thăm Việt ...|Nhận lời mời của ...|Chủ nhật, 27/06/2...|      Khánh Minh|     Thời sự|[\u0027Việt Nam\u0027, \u0027Tổn...|\n|10067|https://laodong.v...|Thủ tướng kiểm tr...|Kiểm tra công tác...|\"Không được để sơ...|Thứ bảy, 26/06/20...|    Huyên Nguyễn|     Thời sự|[\u0027Thủ tướng\u0027, \u0027Th...|\n| 1007|https://laodong.v...|Lách luật huy độn...|TPHCM-Thời gian q...|Đơn cử như mới đâ...|Thứ năm, 25/11/20...|        Gia Miêu|Bất động sản|[\u0027TPHCM\u0027, \u0027Hình t...|\n|10070|https://laodong.v...|Thủ tướng trực ti...|Sáng 26.6, Thủ tư...|\"Theo lịch trình,...|Thứ bảy, 26/06/20...|    Huyên Nguyễn|     Thời sự|[\u0027Thủ tướng\u0027, \u0027CO...|\n|10074|https://laodong.v...|Lo ngại tình trạn...|Theo đại diện Cục...|Theo Cổng thông t...|Thứ sáu, 25/06/20...|       Phạm Đông|     Thời sự|[\u0027Phòng chống dịc...|\n|10081|https://laodong.v...|Chủ tịch và 4 Phó...|Ông Trần Việt Trư...|Sáng ngày 25.6.20...|Thứ sáu, 25/06/20...|        BẠCH CÚC|     Thời sự|[\u0027Cần Thơ\u0027, \u0027Trần...|\n|10083|https://laodong.v...|Ông Lương Nguyễn ...|Sáng 25.6, Hội đồ...|Tại kỳ họp đầu ti...|Thứ sáu, 25/06/20...|      THUỲ TRANG|     Thời sự|[\u0027Đà Nẵng\u0027, \u0027Thàn...|\n|10087|https://laodong.v...|Thu hồi tài sản l...|Những năm qua, Đả...|Thu hồi tài sản t...|Thứ sáu, 25/06/20...|       Phạm Đông|     Thời sự|[\u0027phòng chống tha...|\n| 1009|https://laodong.v...|Chặn tình trạng p...|Trước tình trạng ...|\"Theo thống kê củ...|Thứ năm, 25/11/20...|      CAO NGUYÊN|Bất động sản|[\u0027Tách thửa\u0027, \u0027Ph...|\n|10096|https://laodong.v...|Thủ tướng đề nghị...|Chiều 24.6, Thủ t...|Hai bên đã trao đ...|Thứ năm, 24/06/20...|       Song Minh|     Thời sự|[\u0027Việt Nam\u0027, \u0027WHO...|\n+-----+--------------------+--------------------+--------------------+--------------------+--------------------+----------------+------------+--------------------+\nonly showing top 20 rows\n\n58340"
+          },
+          {
+            "type": "HTML",
+            "data": "\u003chr/\u003eSpark Application Id: application_1656193753050_0001\u003cbr/\u003eSpark WebUI: \u003ca href\u003d\"http://master:8088/proxy/application_1656193753050_0001/\"\u003ehttp://master:8088/proxy/application_1656193753050_0001/\u003c/a\u003e"
+          }
+        ]
+      },
+      "apps": [],
+      "runtimeInfos": {},
+      "progressUpdateIntervalMs": 500,
+      "jobName": "paragraph_1656199958938_590953474",
+      "id": "paragraph_1656199958938_590953474",
+      "dateCreated": "2022-06-25 23:32:38.939",
+      "dateStarted": "2022-06-25 23:33:25.715",
+      "dateFinished": "2022-06-25 23:34:52.677",
+      "status": "FINISHED"
+    },
+    {
+      "text": "%livy.sql\n",
+      "user": "anonymous",
+      "dateUpdated": "2022-06-09 15:04:09.799",
+      "progress": 0,
+      "config": {},
+      "settings": {
+        "params": {},
+        "forms": {}
+      },
+      "apps": [],
+      "runtimeInfos": {},
+      "progressUpdateIntervalMs": 500,
+      "jobName": "paragraph_1654787049789_1737077088",
+      "id": "paragraph_1654787049789_1737077088",
+      "dateCreated": "2022-06-09 15:04:09.798",
+      "status": "READY"
+    }
+  ],
+  "name": "data_preparation",
+  "id": "2FVBJBJ1V",
+  "defaultInterpreterGroup": "spark",
+  "version": "0.9.0",
+  "noteParams": {},
+  "noteForms": {},
+  "angularObjects": {},
+  "config": {
+    "isZeppelinNotebookCronEnable": false,
+    "looknfeel": "default",
+    "personalizedMode": "false"
+  },
+  "info": {}
+}

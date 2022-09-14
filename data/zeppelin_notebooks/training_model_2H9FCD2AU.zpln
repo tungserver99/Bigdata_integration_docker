@@ -1,0 +1,1734 @@
+{
+  "paragraphs": [
+    {
+      "text": "%livy.pyspark\nfrom pyspark.sql import SparkSession\nfrom pyspark.ml import Pipeline\nfrom pyspark.ml.feature import CountVectorizer,StringIndexer, RegexTokenizer,StopWordsRemover, IDF\nfrom pyspark.ml.feature import CountVectorizerModel, IDFModel, StringIndexerModel\nfrom pyspark.sql.functions import col, udf,regexp_replace,isnull\nfrom pyspark.sql.types import StringType,IntegerType\nfrom pyspark.ml.classification import NaiveBayes, RandomForestClassifier, LogisticRegression, DecisionTreeClassifier, GBTClassifier\nfrom pyspark.ml.classification import NaiveBayesModel, RandomForestClassificationModel, LogisticRegressionModel, DecisionTreeClassificationModel, GBTClassificationModel\nfrom pyspark.ml.evaluation import MulticlassClassificationEvaluator\nimport string\nfrom pyspark.sql.functions import concat,concat_ws",
+      "user": "anonymous",
+      "dateUpdated": "2022-07-12 10:26:36.469",
+      "progress": 0,
+      "config": {
+        "tableHide": false,
+        "editorSetting": {
+          "language": "python",
+          "editOnDblClick": false,
+          "completionKey": "TAB",
+          "completionSupport": true
+        },
+        "colWidth": 12.0,
+        "editorMode": "ace/mode/python",
+        "fontSize": 9.0,
+        "editorHide": false,
+        "results": {},
+        "enabled": true
+      },
+      "settings": {
+        "params": {},
+        "forms": {}
+      },
+      "results": {
+        "code": "SUCCESS",
+        "msg": [
+          {
+            "type": "HTML",
+            "data": "\u003chr/\u003eSpark Application Id: application_1657620948759_0003\u003cbr/\u003eSpark WebUI: \u003ca href\u003d\"http://master:8088/proxy/application_1657620948759_0003/\"\u003ehttp://master:8088/proxy/application_1657620948759_0003/\u003c/a\u003e"
+          }
+        ]
+      },
+      "apps": [],
+      "runtimeInfos": {},
+      "progressUpdateIntervalMs": 500,
+      "jobName": "paragraph_1657374840806_1771210481",
+      "id": "paragraph_1657374840806_1771210481",
+      "dateCreated": "2022-07-09 13:54:00.806",
+      "dateStarted": "2022-07-12 10:26:36.554",
+      "dateFinished": "2022-07-12 10:26:58.853",
+      "status": "FINISHED"
+    },
+    {
+      "text": "%md\n# Tiền xử lý dữ liệu  ",
+      "user": "anonymous",
+      "dateUpdated": "2022-07-10 14:51:58.331",
+      "progress": 0,
+      "config": {
+        "tableHide": false,
+        "editorSetting": {
+          "language": "markdown",
+          "editOnDblClick": true,
+          "completionKey": "TAB",
+          "completionSupport": false
+        },
+        "colWidth": 12.0,
+        "editorMode": "ace/mode/markdown",
+        "fontSize": 9.0,
+        "editorHide": true,
+        "results": {},
+        "enabled": true
+      },
+      "settings": {
+        "params": {},
+        "forms": {}
+      },
+      "results": {
+        "code": "SUCCESS",
+        "msg": [
+          {
+            "type": "HTML",
+            "data": "\u003cdiv class\u003d\"markdown-body\"\u003e\n\u003ch1\u003eTiền xử lý dữ liệu\u003c/h1\u003e\n\u003c/div\u003e"
+          }
+        ]
+      },
+      "apps": [],
+      "runtimeInfos": {},
+      "progressUpdateIntervalMs": 500,
+      "jobName": "paragraph_1656206782540_1587706141",
+      "id": "paragraph_1656206782540_1587706141",
+      "dateCreated": "2022-06-26 01:26:22.540",
+      "dateStarted": "2022-07-10 14:51:58.334",
+      "dateFinished": "2022-07-10 14:52:00.645",
+      "status": "FINISHED"
+    },
+    {
+      "text": "%md\n### Đánh số các chủ đề   ",
+      "user": "anonymous",
+      "dateUpdated": "2022-06-26 02:14:39.733",
+      "progress": 0,
+      "config": {
+        "tableHide": false,
+        "editorSetting": {
+          "language": "markdown",
+          "editOnDblClick": true,
+          "completionKey": "TAB",
+          "completionSupport": false
+        },
+        "colWidth": 12.0,
+        "editorMode": "ace/mode/markdown",
+        "fontSize": 9.0,
+        "editorHide": true,
+        "results": {},
+        "enabled": true
+      },
+      "settings": {
+        "params": {},
+        "forms": {}
+      },
+      "results": {
+        "code": "SUCCESS",
+        "msg": [
+          {
+            "type": "HTML",
+            "data": "\u003cdiv class\u003d\"markdown-body\"\u003e\n\u003ch3\u003eĐánh số các chủ đề\u003c/h3\u003e\n\u003c/div\u003e"
+          }
+        ]
+      },
+      "apps": [],
+      "runtimeInfos": {},
+      "progressUpdateIntervalMs": 500,
+      "jobName": "paragraph_1656209272757_1444382256",
+      "id": "paragraph_1656209272757_1444382256",
+      "dateCreated": "2022-06-26 02:07:52.898",
+      "dateStarted": "2022-06-26 02:14:39.733",
+      "dateFinished": "2022-06-26 02:14:40.493",
+      "status": "FINISHED"
+    },
+    {
+      "text": "%livy.pyspark\ntrain_df \u003d spark.read.format(\"csv\").option(\"inferSchema\", True).option(\"header\", True).option(\"delimiter\",\"\\t\").load(\"/data/train/train_raw\")\nindexer \u003d StringIndexer(inputCol\u003d\"Category\", outputCol\u003d\"categoryIndex\")\nindexer \u003d indexer.fit(train_df)\nindexer.save(model_path + \"string_indexer\")\nindexed \u003d indexer.transform(train_df)\nindexed.show()",
+      "user": "anonymous",
+      "dateUpdated": "2022-07-10 16:13:47.264",
+      "progress": 100,
+      "config": {
+        "editorSetting": {
+          "language": "python",
+          "editOnDblClick": false,
+          "completionKey": "TAB",
+          "completionSupport": true
+        },
+        "colWidth": 12.0,
+        "editorMode": "ace/mode/python",
+        "fontSize": 9.0,
+        "results": {},
+        "enabled": true
+      },
+      "settings": {
+        "params": {},
+        "forms": {}
+      },
+      "results": {
+        "code": "SUCCESS",
+        "msg": [
+          {
+            "type": "TEXT",
+            "data": "+-----+--------------------+--------------------+--------------------+--------------------+--------------------+------------+------------+--------------------+-------------+\n|  _c0|                 URL|               Title|             Summary|            Contents|                Date|   Author(s)|    Category|                Tags|categoryIndex|\n+-----+--------------------+--------------------+--------------------+--------------------+--------------------+------------+------------+--------------------+-------------+\n|    0|https://laodong.v...|\"Thông tin “Ngọc ...|Lâm Đồng - Lãnh đ...|Những ngày vừa qu...|Thứ sáu, 20/05/20...|Phương Nhiên|Bất động sản|[\u0027Lâm Đồng\u0027, \u0027Ngọ...|         12.0|\n|    1|https://laodong.v...|Lỗ hổng trong việ...|TPHCM - Việc khôn...|\"Theo thông tin t...|Thứ sáu, 20/05/20...|    Gia Miêu|Bất động sản|[\u0027Thủ Thiêm\u0027, \u0027Đấ...|         12.0|\n|   10|https://laodong.v...|Giá trị các khu đ...|Đồng Nai - Trong ...|Theo đó, ở TP.Biê...|Thứ tư, 18/05/202...|HÀ ANH CHIẾN|Bất động sản|[\u0027Đồng Nai\u0027, \u0027Biê...|         12.0|\n|  100|https://laodong.v...|Những điểm nghẽn ...|Thị trường bất độ...|\"Tháo gỡ rào cản ...|Thứ tư, 04/05/202...|     Lan Nhi|Bất động sản|[\u0027Du lịch\u0027, \u0027Nghỉ...|         12.0|\n| 1000|https://laodong.v...|Cơ hội đặc biệt đ...|Chương trình “Tổ ...|\"Không gian thông...|Thứ sáu, 26/11/20...|     Diệu An|Bất động sản|[\u0027Vinhomes Ocean ...|         12.0|\n|10000|https://laodong.v...|Ngày mai, Hà Nội ...|Từ ngày mai, 1.7,...|Để triển khai hiệ...|Thứ tư, 30/06/202...|  VƯƠNG TRẦN|     Thời sự|[\u0027Hà Nội\u0027, \u0027Quốc ...|          8.0|\n|10001|https://laodong.v...|Giám đốc Công an ...|Lãnh đạo tỉnh Đồn...|Thiếu tướng Vũ Hồ...|Thứ tư, 30/06/202...|         M.A|     Thời sự|[\u0027Công an\u0027, \u0027Thủ ...|          8.0|\n|10002|https://laodong.v...|Thủ tướng đề nghị...|Tại buổi làm việc...|Tối 29.6, tại trụ...|Thứ tư, 30/06/202...|   Phạm Đông|     Thời sự|[\u0027Sản xuất vaccin...|          8.0|\n|10003|https://laodong.v...|Giám đốc Công an ...|Đại tá Hồ Văn Mườ...|Sáng 30.6, HĐND t...|Thứ tư, 30/06/202...|   BẢO TRUNG|     Thời sự|[\u0027Công an\u0027, \u0027Đắk ...|          8.0|\n|10004|https://laodong.v...|Chủ tịch Quốc hội...|Ngày 30.6, đoàn c...|\"Ủy viên Trung ươ...|Thứ tư, 30/06/202...|   BẢO TRUNG|     Thời sự|[\u0027Người lao động\u0027...|          8.0|\n|10005|https://laodong.v...|Ông Phạm Ngọc Ngh...|Ông Phạm Ngọc Ngh...|Ngày 30.6, HĐND t...|Thứ tư, 30/06/202...|   BẢO TRUNG|     Thời sự|[\u0027Quốc hội\u0027, \u0027Chủ...|          8.0|\n|10006|https://laodong.v...|Ông Nguyễn Văn Th...|Ngày 30.6, Hội đồ...|Theo kết quả bỏ p...|Thứ tư, 30/06/202...|    Thành An|     Thời sự|[\u0027Bà Rịa - Vũng T...|          8.0|\n|10007|https://laodong.v...|Ông Võ Ngọc Đồng ...|Sáng 30.6, UBND T...|Ông Võ Ngọc Đồng ...|Thứ tư, 30/06/202...|  THUỲ TRANG|     Thời sự|[\u0027Đà Nẵng\u0027, \u0027Hoàn...|          8.0|\n|10008|https://laodong.v...|Ông Phạm Viết Tha...|Ngày 30.6, tại Tr...|Tại kỳ họp này, H...|Thứ tư, 30/06/202...|    Thành An|     Thời sự|[\u0027Bà Rịa - Vũng T...|          8.0|\n|10009|https://laodong.v...|Hà Tĩnh có tân Gi...|Chủ tịch UBND tỉn...|Theo đó, quyết đị...|Thứ tư, 30/06/202...|   TRẦN TUẤN|     Thời sự|[\u0027Bổ nhiệm\u0027, \u0027Hà ...|          8.0|\n| 1001|https://laodong.v...|Người mua nhà ở T...|TPHCM - Mua căn h...|Mắc kẹt với sai p...|Thứ sáu, 26/11/20...|    Gia Miêu|Bất động sản|[\u0027TPHCM\u0027, \u0027sổ hồn...|         12.0|\n|10010|https://laodong.v...|Bí thư Hậu Giang ...|Ông Lê Tiến Châu ...|Sáng 30.6, tại Hà...|Thứ tư, 30/06/202...|   Phạm Đông|     Thời sự|[\u0027Bí thư Hậu Gian...|          8.0|\n|10011|https://laodong.v...|Thư cảm ơn của Tổ...|Kết thúc chuyến t...|\"Chiều 29.6, Tổng...|Thứ tư, 30/06/202...|          LĐ|     Thời sự|[\u0027Việt Nam\u0027, \u0027Tổn...|          8.0|\n|10012|https://laodong.v...|Bảo đảm an ninh m...|Bộ trưởng Ngoại g...|Ngày 29.6.2021, B...|Thứ tư, 30/06/202...|    Ngọc Vân|     Thời sự|[\u0027Việt Nam\u0027, \u0027Liê...|          8.0|\n|10013|https://laodong.v...|ASEAN-Nga hợp tác...|Việt Nam cam kết ...|Làm sâu sắc hơn q...|Thứ tư, 30/06/202...|    Thanh Hà|     Thời sự|[\u0027Nga\u0027, \u0027Hòa Bình...|          8.0|\n+-----+--------------------+--------------------+--------------------+--------------------+--------------------+------------+------------+--------------------+-------------+\nonly showing top 20 rows"
+          },
+          {
+            "type": "HTML",
+            "data": "\u003chr/\u003eSpark Application Id: application_1656193753050_0005\u003cbr/\u003eSpark WebUI: \u003ca href\u003d\"http://master:8088/proxy/application_1656193753050_0005/\"\u003ehttp://master:8088/proxy/application_1656193753050_0005/\u003c/a\u003e"
+          }
+        ]
+      },
+      "apps": [],
+      "runtimeInfos": {},
+      "progressUpdateIntervalMs": 500,
+      "jobName": "paragraph_1656206088702_1792183336",
+      "id": "paragraph_1655222266607_1289469866",
+      "dateCreated": "2022-06-26 01:14:48.702",
+      "dateStarted": "2022-06-26 01:35:55.872",
+      "dateFinished": "2022-06-26 01:43:49.689",
+      "status": "FINISHED"
+    },
+    {
+      "text": "%md\n### Kết hợp tiêu đề, tóm tắt và nội dung ",
+      "user": "anonymous",
+      "dateUpdated": "2022-06-26 02:15:59.981",
+      "progress": 0,
+      "config": {
+        "tableHide": false,
+        "editorSetting": {
+          "language": "markdown",
+          "editOnDblClick": true,
+          "completionKey": "TAB",
+          "completionSupport": false
+        },
+        "colWidth": 12.0,
+        "editorMode": "ace/mode/markdown",
+        "fontSize": 9.0,
+        "editorHide": true,
+        "results": {},
+        "enabled": true
+      },
+      "settings": {
+        "params": {},
+        "forms": {}
+      },
+      "results": {
+        "code": "SUCCESS",
+        "msg": [
+          {
+            "type": "HTML",
+            "data": "\u003cdiv class\u003d\"markdown-body\"\u003e\n\u003ch3\u003eKết hợp tiêu đề, tóm tắt và nội dung\u003c/h3\u003e\n\u003c/div\u003e"
+          }
+        ]
+      },
+      "apps": [],
+      "runtimeInfos": {},
+      "progressUpdateIntervalMs": 500,
+      "jobName": "paragraph_1656209688502_1577231189",
+      "id": "paragraph_1656209688502_1577231189",
+      "dateCreated": "2022-06-26 02:14:48.502",
+      "dateStarted": "2022-06-26 02:16:00.219",
+      "dateFinished": "2022-06-26 02:16:02.947",
+      "status": "FINISHED"
+    },
+    {
+      "text": "%livy.pyspark\nfrom pyspark.sql.functions import concat,concat_ws\nfullContents \u003d indexed.select(concat_ws(\u0027 \u0027, indexed.Title, indexed.Summary, indexed.Contents).alias(\"fullContents\"), \"Category\", \"categoryIndex\")\nfullContents.coalesce(1).write.mode(\"overwrite\").format(\"csv\").option(\"header\", \"true\").option(\"delimiter\",\"\\t\").save(\"/data/train/fullContents\")",
+      "user": "anonymous",
+      "dateUpdated": "2022-07-06 01:16:31.344",
+      "progress": 100,
+      "config": {
+        "editorSetting": {
+          "language": "python",
+          "editOnDblClick": false,
+          "completionKey": "TAB",
+          "completionSupport": true
+        },
+        "colWidth": 12.0,
+        "editorMode": "ace/mode/python",
+        "fontSize": 9.0,
+        "results": {},
+        "enabled": true
+      },
+      "settings": {
+        "params": {},
+        "forms": {}
+      },
+      "apps": [],
+      "runtimeInfos": {},
+      "progressUpdateIntervalMs": 500,
+      "jobName": "paragraph_1656206920263_113991662",
+      "id": "paragraph_1656206920263_113991662",
+      "dateCreated": "2022-06-26 01:28:40.282",
+      "dateStarted": "2022-07-06 01:16:31.415",
+      "dateFinished": "2022-07-06 01:16:48.424",
+      "status": "ABORT"
+    },
+    {
+      "text": "%livy.pyspark\nfullContents \u003d spark.read.format(\"csv\").option(\"inferSchema\", True).option(\"header\", True).option(\"delimiter\",\"\\t\").load(\"/data/train/fullContents\")\nfullContents.show(20)",
+      "user": "anonymous",
+      "dateUpdated": "2022-07-10 16:23:02.010",
+      "progress": 92,
+      "config": {
+        "editorSetting": {
+          "language": "python",
+          "editOnDblClick": false,
+          "completionKey": "TAB",
+          "completionSupport": true
+        },
+        "colWidth": 12.0,
+        "editorMode": "ace/mode/python",
+        "fontSize": 9.0,
+        "results": {},
+        "enabled": true
+      },
+      "settings": {
+        "params": {},
+        "forms": {}
+      },
+      "results": {
+        "code": "SUCCESS",
+        "msg": [
+          {
+            "type": "TEXT",
+            "data": "+--------------------+------------+-------------+\n|        fullContents|    Category|categoryIndex|\n+--------------------+------------+-------------+\n|\"Thông tin “Ngọc ...|Bất động sản|         12.0|\n|Lỗ hổng trong việ...|Bất động sản|         12.0|\n|Giá trị các khu đ...|Bất động sản|         12.0|\n|Những điểm nghẽn ...|Bất động sản|         12.0|\n|Cơ hội đặc biệt đ...|Bất động sản|         12.0|\n|Ngày mai, Hà Nội ...|     Thời sự|          8.0|\n|Giám đốc Công an ...|     Thời sự|          8.0|\n|Thủ tướng đề nghị...|     Thời sự|          8.0|\n|Giám đốc Công an ...|     Thời sự|          8.0|\n|Chủ tịch Quốc hội...|     Thời sự|          8.0|\n|Ông Phạm Ngọc Ngh...|     Thời sự|          8.0|\n|Ông Nguyễn Văn Th...|     Thời sự|          8.0|\n|Ông Võ Ngọc Đồng ...|     Thời sự|          8.0|\n|Ông Phạm Viết Tha...|     Thời sự|          8.0|\n|Hà Tĩnh có tân Gi...|     Thời sự|          8.0|\n|Người mua nhà ở T...|Bất động sản|         12.0|\n|Bí thư Hậu Giang ...|     Thời sự|          8.0|\n|Thư cảm ơn của Tổ...|     Thời sự|          8.0|\n|Bảo đảm an ninh m...|     Thời sự|          8.0|\n|ASEAN-Nga hợp tác...|     Thời sự|          8.0|\n+--------------------+------------+-------------+\nonly showing top 20 rows"
+          },
+          {
+            "type": "HTML",
+            "data": "\u003chr/\u003eSpark Application Id: application_1657468101080_0002\u003cbr/\u003eSpark WebUI: \u003ca href\u003d\"http://master:8088/proxy/application_1657468101080_0002/\"\u003ehttp://master:8088/proxy/application_1657468101080_0002/\u003c/a\u003e"
+          }
+        ]
+      },
+      "apps": [],
+      "runtimeInfos": {},
+      "progressUpdateIntervalMs": 500,
+      "jobName": "paragraph_1656208421822_1574437070",
+      "id": "paragraph_1656208421822_1574437070",
+      "dateCreated": "2022-06-26 01:53:41.822",
+      "dateStarted": "2022-07-10 16:23:02.064",
+      "dateFinished": "2022-07-10 16:23:10.140",
+      "status": "FINISHED"
+    },
+    {
+      "text": "%livy.pyspark\ntrain_category \u003d fullContents.groupBy(\"Category\", \"categoryIndex\").count()\ntrain_category.show(20, False)\ntrain_category.createOrReplaceTempView(\"Train_category\")",
+      "user": "anonymous",
+      "dateUpdated": "2022-07-10 16:25:20.458",
+      "progress": 65,
+      "config": {
+        "editorSetting": {
+          "language": "python",
+          "editOnDblClick": false,
+          "completionKey": "TAB",
+          "completionSupport": true
+        },
+        "colWidth": 12.0,
+        "editorMode": "ace/mode/python",
+        "fontSize": 9.0,
+        "results": {},
+        "enabled": true
+      },
+      "settings": {
+        "params": {},
+        "forms": {}
+      },
+      "results": {
+        "code": "SUCCESS",
+        "msg": [
+          {
+            "type": "TEXT",
+            "data": "+-------------------+-------------+-----+\n|Category           |categoryIndex|count|\n+-------------------+-------------+-----+\n|Công đoàn          |5.0          |17522|\n|Công nghệ          |16.0         |1078 |\n|Tin hoạt động      |22.0         |131  |\n|Giáo dục           |6.0          |17480|\n|Lao Động \u0026 Đời sống|20.0         |192  |\n|Gia đình - Hôn nhân|13.0         |3531 |\n|Pháp luật          |3.0          |21842|\n|Diễn đàn           |19.0         |246  |\n|Thế giới           |2.0          |22301|\n|Lưu trữ            |18.0         |309  |\n|Thể thao           |1.0          |23932|\n|Lao Động cuối tuần |17.0         |514  |\n|Xã hội             |0.0          |44571|\n|Tấm Lòng Vàng      |15.0         |1264 |\n|Tin tức việc làm   |21.0         |142  |\n|Thời sự            |8.0          |12655|\n|Xe +               |14.0         |3133 |\n|Sức khỏe           |9.0          |9170 |\n|Bất động sản       |12.0         |5006 |\n|Media              |11.0         |5818 |\n+-------------------+-------------+-----+\nonly showing top 20 rows"
+          },
+          {
+            "type": "HTML",
+            "data": "\u003chr/\u003eSpark Application Id: application_1657468101080_0002\u003cbr/\u003eSpark WebUI: \u003ca href\u003d\"http://master:8088/proxy/application_1657468101080_0002/\"\u003ehttp://master:8088/proxy/application_1657468101080_0002/\u003c/a\u003e"
+          }
+        ]
+      },
+      "apps": [],
+      "runtimeInfos": {},
+      "progressUpdateIntervalMs": 500,
+      "jobName": "paragraph_1657470086390_1036950211",
+      "id": "paragraph_1657470086390_1036950211",
+      "dateCreated": "2022-07-10 16:21:26.390",
+      "dateStarted": "2022-07-10 16:25:20.512",
+      "dateFinished": "2022-07-10 16:25:25.573",
+      "status": "FINISHED"
+    },
+    {
+      "text": "%livy.sql\nSELECT categoryIndex, count FROM Train_category",
+      "user": "anonymous",
+      "dateUpdated": "2022-07-10 16:27:59.084",
+      "progress": 81,
+      "config": {
+        "editorSetting": {
+          "language": "sql",
+          "editOnDblClick": false,
+          "completionKey": "TAB",
+          "completionSupport": true
+        },
+        "colWidth": 12.0,
+        "editorMode": "ace/mode/sql",
+        "fontSize": 9.0,
+        "results": {
+          "0": {
+            "graph": {
+              "mode": "multiBarChart",
+              "height": 300.0,
+              "optionOpen": false,
+              "setting": {
+                "table": {
+                  "tableGridState": {},
+                  "tableColumnTypeState": {
+                    "names": {
+                      "categoryIndex": "string",
+                      "count": "string"
+                    },
+                    "updated": false
+                  },
+                  "tableOptionSpecHash": "[{\"name\":\"useFilter\",\"valueType\":\"boolean\",\"defaultValue\":false,\"widget\":\"checkbox\",\"description\":\"Enable filter for columns\"},{\"name\":\"showPagination\",\"valueType\":\"boolean\",\"defaultValue\":false,\"widget\":\"checkbox\",\"description\":\"Enable pagination for better navigation\"},{\"name\":\"showAggregationFooter\",\"valueType\":\"boolean\",\"defaultValue\":false,\"widget\":\"checkbox\",\"description\":\"Enable a footer for displaying aggregated values\"}]",
+                  "tableOptionValue": {
+                    "useFilter": false,
+                    "showPagination": false,
+                    "showAggregationFooter": false
+                  },
+                  "updated": false,
+                  "initialized": false
+                },
+                "multiBarChart": {
+                  "rotate": {
+                    "degree": "-45"
+                  },
+                  "xLabelStatus": "default",
+                  "stacked": false
+                },
+                "stackedAreaChart": {
+                  "rotate": {
+                    "degree": "-45"
+                  },
+                  "xLabelStatus": "default"
+                },
+                "lineChart": {
+                  "rotate": {
+                    "degree": "-45"
+                  },
+                  "xLabelStatus": "default"
+                }
+              },
+              "commonSetting": {},
+              "keys": [
+                {
+                  "name": "categoryIndex",
+                  "index": 0.0,
+                  "aggr": "sum"
+                }
+              ],
+              "groups": [],
+              "values": [
+                {
+                  "name": "count",
+                  "index": 1.0,
+                  "aggr": "sum"
+                }
+              ]
+            },
+            "helium": {}
+          }
+        },
+        "enabled": true
+      },
+      "settings": {
+        "params": {},
+        "forms": {}
+      },
+      "results": {
+        "code": "SUCCESS",
+        "msg": [
+          {
+            "type": "TABLE",
+            "data": "categoryIndex\tcount\n5.0\t17522\n16.0\t1078\n22.0\t131\n6.0\t17480\n20.0\t192\n13.0\t3531\n3.0\t21842\n19.0\t246\n2.0\t22301\n18.0\t309\n1.0\t23932\n17.0\t514\n0.0\t44571\n15.0\t1264\n21.0\t142\n8.0\t12655\n14.0\t3133\n9.0\t9170\n12.0\t5006\n11.0\t5818\n4.0\t21462\n7.0\t14347\n10.0\t6611"
+          },
+          {
+            "type": "HTML",
+            "data": "\u003chr/\u003eSpark Application Id: application_1657468101080_0002\u003cbr/\u003eSpark WebUI: \u003ca href\u003d\"http://master:8088/proxy/application_1657468101080_0002/\"\u003ehttp://master:8088/proxy/application_1657468101080_0002/\u003c/a\u003e"
+          }
+        ]
+      },
+      "apps": [],
+      "runtimeInfos": {},
+      "progressUpdateIntervalMs": 500,
+      "jobName": "paragraph_1657470274095_453015132",
+      "id": "paragraph_1657470274095_453015132",
+      "dateCreated": "2022-07-10 16:24:34.095",
+      "dateStarted": "2022-07-10 16:26:08.382",
+      "dateFinished": "2022-07-10 16:26:14.479",
+      "status": "FINISHED"
+    },
+    {
+      "text": "%md\n### Xóa bỏ các ký tự số trong các văn bản  ",
+      "user": "anonymous",
+      "dateUpdated": "2022-06-26 22:37:11.786",
+      "progress": 0,
+      "config": {
+        "tableHide": false,
+        "editorSetting": {
+          "language": "markdown",
+          "editOnDblClick": true,
+          "completionKey": "TAB",
+          "completionSupport": false
+        },
+        "colWidth": 12.0,
+        "editorMode": "ace/mode/markdown",
+        "fontSize": 9.0,
+        "editorHide": true,
+        "results": {},
+        "enabled": true
+      },
+      "settings": {
+        "params": {},
+        "forms": {}
+      },
+      "results": {
+        "code": "SUCCESS",
+        "msg": [
+          {
+            "type": "HTML",
+            "data": "\u003cdiv class\u003d\"markdown-body\"\u003e\n\u003ch3\u003eXóa bỏ các ký tự số trong các văn bản\u003c/h3\u003e\n\u003c/div\u003e"
+          }
+        ]
+      },
+      "apps": [],
+      "runtimeInfos": {},
+      "progressUpdateIntervalMs": 500,
+      "jobName": "paragraph_1656282984367_959937686",
+      "id": "paragraph_1656282984367_959937686",
+      "dateCreated": "2022-06-26 22:36:24.367",
+      "dateStarted": "2022-06-26 22:37:11.786",
+      "dateFinished": "2022-06-26 22:37:11.802",
+      "status": "FINISHED"
+    },
+    {
+      "text": "%livy.pyspark \nonly_str \u003d fullContents.withColumn(\"only_str\",regexp_replace(col(\u0027fullContents\u0027), \u0027\\d+|“|”\u0027, \u0027\u0027))\nonly_str.show(5)",
+      "user": "anonymous",
+      "dateUpdated": "2022-07-06 02:18:35.235",
+      "progress": 0,
+      "config": {
+        "editorSetting": {
+          "language": "python",
+          "editOnDblClick": false,
+          "completionKey": "TAB",
+          "completionSupport": true
+        },
+        "colWidth": 12.0,
+        "editorMode": "ace/mode/python",
+        "fontSize": 9.0,
+        "results": {},
+        "enabled": true
+      },
+      "settings": {
+        "params": {},
+        "forms": {}
+      },
+      "results": {
+        "code": "SUCCESS",
+        "msg": [
+          {
+            "type": "TEXT",
+            "data": "+--------------------+------------+-------------+--------------------+\n|        fullContents|    Category|categoryIndex|            only_str|\n+--------------------+------------+-------------+--------------------+\n|\"Thông tin “Ngọc ...|Bất động sản|         12.0|\"Thông tin Ngọc T...|\n|Lỗ hổng trong việ...|Bất động sản|         12.0|Lỗ hổng trong việ...|\n|Giá trị các khu đ...|Bất động sản|         12.0|Giá trị các khu đ...|\n|Những điểm nghẽn ...|Bất động sản|         12.0|Những điểm nghẽn ...|\n|Cơ hội đặc biệt đ...|Bất động sản|         12.0|Cơ hội đặc biệt đ...|\n+--------------------+------------+-------------+--------------------+\nonly showing top 5 rows"
+          },
+          {
+            "type": "HTML",
+            "data": "\u003chr/\u003eSpark Application Id: application_1657072667384_0002\u003cbr/\u003eSpark WebUI: \u003ca href\u003d\"http://master:8088/proxy/application_1657072667384_0002/\"\u003ehttp://master:8088/proxy/application_1657072667384_0002/\u003c/a\u003e"
+          }
+        ]
+      },
+      "apps": [],
+      "runtimeInfos": {},
+      "progressUpdateIntervalMs": 500,
+      "jobName": "paragraph_1656283016270_1894212015",
+      "id": "paragraph_1656283016270_1894212015",
+      "dateCreated": "2022-06-26 22:36:56.270",
+      "dateStarted": "2022-07-06 02:18:35.295",
+      "dateFinished": "2022-07-06 02:18:43.183",
+      "status": "FINISHED"
+    },
+    {
+      "text": "%md \n### Xóa bỏ dấu trong văn bản",
+      "user": "anonymous",
+      "dateUpdated": "2022-07-05 15:22:07.327",
+      "progress": 0,
+      "config": {
+        "tableHide": false,
+        "editorSetting": {
+          "language": "markdown",
+          "editOnDblClick": true,
+          "completionKey": "TAB",
+          "completionSupport": false
+        },
+        "colWidth": 12.0,
+        "editorMode": "ace/mode/markdown",
+        "fontSize": 9.0,
+        "editorHide": true,
+        "results": {},
+        "enabled": true
+      },
+      "settings": {
+        "params": {},
+        "forms": {}
+      },
+      "results": {
+        "code": "SUCCESS",
+        "msg": [
+          {
+            "type": "HTML",
+            "data": "\u003cdiv class\u003d\"markdown-body\"\u003e\n\u003ch3\u003eXóa bỏ dấu trong văn bản\u003c/h3\u003e\n\u003c/div\u003e"
+          }
+        ]
+      },
+      "apps": [],
+      "runtimeInfos": {},
+      "progressUpdateIntervalMs": 500,
+      "jobName": "paragraph_1657034474426_366994547",
+      "id": "paragraph_1657034474426_366994547",
+      "dateCreated": "2022-07-05 15:21:14.426",
+      "dateStarted": "2022-07-05 15:22:07.325",
+      "dateFinished": "2022-07-05 15:22:07.336",
+      "status": "FINISHED"
+    },
+    {
+      "text": "%livy.pyspark\nonly_letter \u003d only_str.withColumn(\"only_letter\",regexp_replace(col(\u0027only_str\u0027), \u0027\\\\p{Punct}\u0027, \u0027\u0027)) \nonly_letter.show()",
+      "user": "anonymous",
+      "dateUpdated": "2022-07-06 02:18:37.081",
+      "progress": 0,
+      "config": {
+        "editorSetting": {
+          "language": "python",
+          "editOnDblClick": false,
+          "completionKey": "TAB",
+          "completionSupport": true
+        },
+        "colWidth": 12.0,
+        "editorMode": "ace/mode/python",
+        "fontSize": 9.0,
+        "results": {},
+        "enabled": true
+      },
+      "settings": {
+        "params": {},
+        "forms": {}
+      },
+      "results": {
+        "code": "SUCCESS",
+        "msg": [
+          {
+            "type": "TEXT",
+            "data": "+--------------------+------------+-------------+--------------------+--------------------+\n|        fullContents|    Category|categoryIndex|            only_str|         only_letter|\n+--------------------+------------+-------------+--------------------+--------------------+\n|\"Thông tin “Ngọc ...|Bất động sản|         12.0|\"Thông tin Ngọc T...|Thông tin Ngọc Tr...|\n|Lỗ hổng trong việ...|Bất động sản|         12.0|Lỗ hổng trong việ...|Lỗ hổng trong việ...|\n|Giá trị các khu đ...|Bất động sản|         12.0|Giá trị các khu đ...|Giá trị các khu đ...|\n|Những điểm nghẽn ...|Bất động sản|         12.0|Những điểm nghẽn ...|Những điểm nghẽn ...|\n|Cơ hội đặc biệt đ...|Bất động sản|         12.0|Cơ hội đặc biệt đ...|Cơ hội đặc biệt đ...|\n|Ngày mai, Hà Nội ...|     Thời sự|          8.0|Ngày mai, Hà Nội ...|Ngày mai Hà Nội b...|\n|Giám đốc Công an ...|     Thời sự|          8.0|Giám đốc Công an ...|Giám đốc Công an ...|\n|Thủ tướng đề nghị...|     Thời sự|          8.0|Thủ tướng đề nghị...|Thủ tướng đề nghị...|\n|Giám đốc Công an ...|     Thời sự|          8.0|Giám đốc Công an ...|Giám đốc Công an ...|\n|Chủ tịch Quốc hội...|     Thời sự|          8.0|Chủ tịch Quốc hội...|Chủ tịch Quốc hội...|\n|Ông Phạm Ngọc Ngh...|     Thời sự|          8.0|Ông Phạm Ngọc Ngh...|Ông Phạm Ngọc Ngh...|\n|Ông Nguyễn Văn Th...|     Thời sự|          8.0|Ông Nguyễn Văn Th...|Ông Nguyễn Văn Th...|\n|Ông Võ Ngọc Đồng ...|     Thời sự|          8.0|Ông Võ Ngọc Đồng ...|Ông Võ Ngọc Đồng ...|\n|Ông Phạm Viết Tha...|     Thời sự|          8.0|Ông Phạm Viết Tha...|Ông Phạm Viết Tha...|\n|Hà Tĩnh có tân Gi...|     Thời sự|          8.0|Hà Tĩnh có tân Gi...|Hà Tĩnh có tân Gi...|\n|Người mua nhà ở T...|Bất động sản|         12.0|Người mua nhà ở T...|Người mua nhà ở T...|\n|Bí thư Hậu Giang ...|     Thời sự|          8.0|Bí thư Hậu Giang ...|Bí thư Hậu Giang ...|\n|Thư cảm ơn của Tổ...|     Thời sự|          8.0|Thư cảm ơn của Tổ...|Thư cảm ơn của Tổ...|\n|Bảo đảm an ninh m...|     Thời sự|          8.0|Bảo đảm an ninh m...|Bảo đảm an ninh m...|\n|ASEAN-Nga hợp tác...|     Thời sự|          8.0|ASEAN-Nga hợp tác...|ASEANNga hợp tác ...|\n+--------------------+------------+-------------+--------------------+--------------------+\nonly showing top 20 rows"
+          },
+          {
+            "type": "HTML",
+            "data": "\u003chr/\u003eSpark Application Id: application_1657072667384_0002\u003cbr/\u003eSpark WebUI: \u003ca href\u003d\"http://master:8088/proxy/application_1657072667384_0002/\"\u003ehttp://master:8088/proxy/application_1657072667384_0002/\u003c/a\u003e"
+          }
+        ]
+      },
+      "apps": [],
+      "runtimeInfos": {},
+      "progressUpdateIntervalMs": 500,
+      "jobName": "paragraph_1657034466231_1531458615",
+      "id": "paragraph_1657034466231_1531458615",
+      "dateCreated": "2022-07-05 15:21:06.237",
+      "dateStarted": "2022-07-06 02:18:42.307",
+      "dateFinished": "2022-07-06 02:18:44.211",
+      "status": "FINISHED"
+    },
+    {
+      "text": "%md \n### Tách đoạn văn thành các từ đơn  ",
+      "user": "anonymous",
+      "dateUpdated": "2022-06-26 22:59:29.230",
+      "progress": 0,
+      "config": {
+        "tableHide": false,
+        "editorSetting": {
+          "language": "markdown",
+          "editOnDblClick": true,
+          "completionKey": "TAB",
+          "completionSupport": false
+        },
+        "colWidth": 12.0,
+        "editorMode": "ace/mode/markdown",
+        "fontSize": 9.0,
+        "editorHide": true,
+        "results": {},
+        "enabled": true
+      },
+      "settings": {
+        "params": {},
+        "forms": {}
+      },
+      "results": {
+        "code": "SUCCESS",
+        "msg": [
+          {
+            "type": "HTML",
+            "data": "\u003cdiv class\u003d\"markdown-body\"\u003e\n\u003ch3\u003eTách đoạn văn thành các từ đơn\u003c/h3\u003e\n\u003c/div\u003e"
+          }
+        ]
+      },
+      "apps": [],
+      "runtimeInfos": {},
+      "progressUpdateIntervalMs": 500,
+      "jobName": "paragraph_1656283438857_2049743961",
+      "id": "paragraph_1656283438857_2049743961",
+      "dateCreated": "2022-06-26 22:43:58.857",
+      "dateStarted": "2022-06-26 22:59:29.278",
+      "dateFinished": "2022-06-26 22:59:29.486",
+      "status": "FINISHED"
+    },
+    {
+      "text": "%livy.pyspark\nregex_tokenizer \u003d RegexTokenizer(inputCol\u003d\"only_letter\", outputCol\u003d\"words\")\nraw_words \u003d regex_tokenizer.transform(only_letter)\nraw_words.show(5)",
+      "user": "anonymous",
+      "dateUpdated": "2022-07-06 02:18:39.372",
+      "progress": 0,
+      "config": {
+        "editorSetting": {
+          "language": "python",
+          "editOnDblClick": false,
+          "completionKey": "TAB",
+          "completionSupport": true
+        },
+        "colWidth": 12.0,
+        "editorMode": "ace/mode/python",
+        "fontSize": 9.0,
+        "results": {},
+        "enabled": true
+      },
+      "settings": {
+        "params": {},
+        "forms": {}
+      },
+      "results": {
+        "code": "SUCCESS",
+        "msg": [
+          {
+            "type": "TEXT",
+            "data": "+--------------------+------------+-------------+--------------------+--------------------+--------------------+\n|        fullContents|    Category|categoryIndex|            only_str|         only_letter|               words|\n+--------------------+------------+-------------+--------------------+--------------------+--------------------+\n|\"Thông tin “Ngọc ...|Bất động sản|         12.0|\"Thông tin Ngọc T...|Thông tin Ngọc Tr...|[thông, tin, ngọc...|\n|Lỗ hổng trong việ...|Bất động sản|         12.0|Lỗ hổng trong việ...|Lỗ hổng trong việ...|[lỗ, hổng, trong,...|\n|Giá trị các khu đ...|Bất động sản|         12.0|Giá trị các khu đ...|Giá trị các khu đ...|[giá, trị, các, k...|\n|Những điểm nghẽn ...|Bất động sản|         12.0|Những điểm nghẽn ...|Những điểm nghẽn ...|[những, điểm, ngh...|\n|Cơ hội đặc biệt đ...|Bất động sản|         12.0|Cơ hội đặc biệt đ...|Cơ hội đặc biệt đ...|[cơ, hội, đặc, bi...|\n+--------------------+------------+-------------+--------------------+--------------------+--------------------+\nonly showing top 5 rows"
+          },
+          {
+            "type": "HTML",
+            "data": "\u003chr/\u003eSpark Application Id: application_1657072667384_0002\u003cbr/\u003eSpark WebUI: \u003ca href\u003d\"http://master:8088/proxy/application_1657072667384_0002/\"\u003ehttp://master:8088/proxy/application_1657072667384_0002/\u003c/a\u003e"
+          }
+        ]
+      },
+      "apps": [],
+      "runtimeInfos": {},
+      "progressUpdateIntervalMs": 500,
+      "jobName": "paragraph_1656284369226_1777716836",
+      "id": "paragraph_1656284369226_1777716836",
+      "dateCreated": "2022-06-26 22:59:29.226",
+      "dateStarted": "2022-07-06 02:18:43.308",
+      "dateFinished": "2022-07-06 02:18:45.234",
+      "status": "FINISHED"
+    },
+    {
+      "text": "%md\n### Tạo vector feature",
+      "user": "anonymous",
+      "dateUpdated": "2022-07-05 16:03:13.807",
+      "progress": 0,
+      "config": {
+        "tableHide": false,
+        "editorSetting": {
+          "language": "markdown",
+          "editOnDblClick": true,
+          "completionKey": "TAB",
+          "completionSupport": false
+        },
+        "colWidth": 12.0,
+        "editorMode": "ace/mode/markdown",
+        "fontSize": 9.0,
+        "editorHide": true,
+        "results": {},
+        "enabled": true
+      },
+      "settings": {
+        "params": {},
+        "forms": {}
+      },
+      "results": {
+        "code": "SUCCESS",
+        "msg": [
+          {
+            "type": "HTML",
+            "data": "\u003cdiv class\u003d\"markdown-body\"\u003e\n\u003ch3\u003eTạo vector feature\u003c/h3\u003e\n\u003c/div\u003e"
+          }
+        ]
+      },
+      "apps": [],
+      "runtimeInfos": {},
+      "progressUpdateIntervalMs": 500,
+      "jobName": "paragraph_1657036957342_1524431350",
+      "id": "paragraph_1657036957342_1524431350",
+      "dateCreated": "2022-07-05 16:02:37.343",
+      "dateStarted": "2022-07-05 16:03:13.809",
+      "dateFinished": "2022-07-05 16:03:13.915",
+      "status": "FINISHED"
+    },
+    {
+      "text": "%livy.pyspark\ncv \u003d CountVectorizer(inputCol\u003d\"words\", outputCol\u003d\"features\")\nmodel \u003d cv.fit(raw_words)\nmodel.save(\"/data/model/count_vectorizer\")\ncountVectorizer_train \u003d model.transform(raw_words)\ncountVectorizer_train.show(5)",
+      "user": "anonymous",
+      "dateUpdated": "2022-07-10 15:35:54.268",
+      "progress": 72,
+      "config": {
+        "editorSetting": {
+          "language": "python",
+          "editOnDblClick": false,
+          "completionKey": "TAB",
+          "completionSupport": true
+        },
+        "colWidth": 12.0,
+        "editorMode": "ace/mode/python",
+        "fontSize": 9.0,
+        "results": {},
+        "enabled": true
+      },
+      "settings": {
+        "params": {},
+        "forms": {}
+      },
+      "results": {
+        "code": "SUCCESS",
+        "msg": [
+          {
+            "type": "TEXT",
+            "data": "+--------------------+------------+-------------+--------------------+--------------------+--------------------+--------------------+\n|        fullContents|    Category|categoryIndex|            only_str|         only_letter|               words|            features|\n+--------------------+------------+-------------+--------------------+--------------------+--------------------+--------------------+\n|\"Thông tin “Ngọc ...|Bất động sản|         12.0|\"Thông tin Ngọc T...|Thông tin Ngọc Tr...|[thông, tin, ngọc...|(262144,[0,1,2,3,...|\n|Lỗ hổng trong việ...|Bất động sản|         12.0|Lỗ hổng trong việ...|Lỗ hổng trong việ...|[lỗ, hổng, trong,...|(262144,[0,1,2,3,...|\n|Giá trị các khu đ...|Bất động sản|         12.0|Giá trị các khu đ...|Giá trị các khu đ...|[giá, trị, các, k...|(262144,[0,2,3,4,...|\n|Những điểm nghẽn ...|Bất động sản|         12.0|Những điểm nghẽn ...|Những điểm nghẽn ...|[những, điểm, ngh...|(262144,[0,1,2,3,...|\n|Cơ hội đặc biệt đ...|Bất động sản|         12.0|Cơ hội đặc biệt đ...|Cơ hội đặc biệt đ...|[cơ, hội, đặc, bi...|(262144,[0,1,2,3,...|\n+--------------------+------------+-------------+--------------------+--------------------+--------------------+--------------------+\nonly showing top 5 rows"
+          },
+          {
+            "type": "HTML",
+            "data": "\u003chr/\u003eSpark Application Id: application_1657072667384_0002\u003cbr/\u003eSpark WebUI: \u003ca href\u003d\"http://master:8088/proxy/application_1657072667384_0002/\"\u003ehttp://master:8088/proxy/application_1657072667384_0002/\u003c/a\u003e"
+          }
+        ]
+      },
+      "apps": [],
+      "runtimeInfos": {},
+      "progressUpdateIntervalMs": 500,
+      "jobName": "paragraph_1656284659697_802805691",
+      "id": "paragraph_1656284659697_802805691",
+      "dateCreated": "2022-06-26 23:04:19.697",
+      "dateStarted": "2022-07-06 02:18:44.311",
+      "dateFinished": "2022-07-06 02:19:53.867",
+      "status": "FINISHED"
+    },
+    {
+      "text": "%livy.pyspark\nidf \u003d IDF(inputCol\u003d\"features\", outputCol\u003d\"tf_idf_features\")\nidfModel \u003d idf.fit(countVectorizer_train)\nidfModel.save(\"/data/model/idf\")\ntf_idf_train \u003d idfModel.transform(countVectorizer_train)\ntf_idf_train.show(5)",
+      "user": "anonymous",
+      "dateUpdated": "2022-07-10 15:36:23.669",
+      "progress": 100,
+      "config": {
+        "editorSetting": {
+          "language": "python",
+          "editOnDblClick": false,
+          "completionKey": "TAB",
+          "completionSupport": true
+        },
+        "colWidth": 12.0,
+        "editorMode": "ace/mode/python",
+        "fontSize": 9.0,
+        "results": {},
+        "enabled": true
+      },
+      "settings": {
+        "params": {},
+        "forms": {}
+      },
+      "results": {
+        "code": "SUCCESS",
+        "msg": [
+          {
+            "type": "TEXT",
+            "data": "+--------------------+------------+-------------+--------------------+--------------------+--------------------+--------------------+--------------------+\n|        fullContents|    Category|categoryIndex|            only_str|         only_letter|               words|            features|     tf_idf_features|\n+--------------------+------------+-------------+--------------------+--------------------+--------------------+--------------------+--------------------+\n|\"Thông tin “Ngọc ...|Bất động sản|         12.0|\"Thông tin Ngọc T...|Thông tin Ngọc Tr...|[thông, tin, ngọc...|(262144,[0,1,2,3,...|(262144,[0,1,2,3,...|\n|Lỗ hổng trong việ...|Bất động sản|         12.0|Lỗ hổng trong việ...|Lỗ hổng trong việ...|[lỗ, hổng, trong,...|(262144,[0,1,2,3,...|(262144,[0,1,2,3,...|\n|Giá trị các khu đ...|Bất động sản|         12.0|Giá trị các khu đ...|Giá trị các khu đ...|[giá, trị, các, k...|(262144,[0,2,3,4,...|(262144,[0,2,3,4,...|\n|Những điểm nghẽn ...|Bất động sản|         12.0|Những điểm nghẽn ...|Những điểm nghẽn ...|[những, điểm, ngh...|(262144,[0,1,2,3,...|(262144,[0,1,2,3,...|\n|Cơ hội đặc biệt đ...|Bất động sản|         12.0|Cơ hội đặc biệt đ...|Cơ hội đặc biệt đ...|[cơ, hội, đặc, bi...|(262144,[0,1,2,3,...|(262144,[0,1,2,3,...|\n+--------------------+------------+-------------+--------------------+--------------------+--------------------+--------------------+--------------------+\nonly showing top 5 rows"
+          },
+          {
+            "type": "HTML",
+            "data": "\u003chr/\u003eSpark Application Id: application_1657072667384_0002\u003cbr/\u003eSpark WebUI: \u003ca href\u003d\"http://master:8088/proxy/application_1657072667384_0002/\"\u003ehttp://master:8088/proxy/application_1657072667384_0002/\u003c/a\u003e"
+          }
+        ]
+      },
+      "apps": [],
+      "runtimeInfos": {},
+      "progressUpdateIntervalMs": 500,
+      "jobName": "paragraph_1657037767366_969069842",
+      "id": "paragraph_1657037767366_969069842",
+      "dateCreated": "2022-07-05 16:16:07.367",
+      "dateStarted": "2022-07-06 02:18:45.414",
+      "dateFinished": "2022-07-06 02:21:06.571",
+      "status": "FINISHED"
+    },
+    {
+      "text": "%livy.pyspark\ninfo_train \u003d tf_idf_train.select(\"tf_idf_features\", \"categoryIndex\")\ninfo_train.coalesce(1).write.mode(\"overwrite\").format(\"parquet\").option(\"header\", \"true\").save(\"/data/train/tf_idf\")",
+      "user": "anonymous",
+      "dateUpdated": "2022-07-06 02:55:11.067",
+      "progress": 0,
+      "config": {
+        "editorSetting": {
+          "language": "python",
+          "editOnDblClick": false,
+          "completionKey": "TAB",
+          "completionSupport": true
+        },
+        "colWidth": 12.0,
+        "editorMode": "ace/mode/python",
+        "fontSize": 9.0,
+        "results": {},
+        "enabled": true
+      },
+      "settings": {
+        "params": {},
+        "forms": {}
+      },
+      "results": {
+        "code": "SUCCESS",
+        "msg": [
+          {
+            "type": "HTML",
+            "data": "\u003chr/\u003eSpark Application Id: application_1657072667384_0002\u003cbr/\u003eSpark WebUI: \u003ca href\u003d\"http://master:8088/proxy/application_1657072667384_0002/\"\u003ehttp://master:8088/proxy/application_1657072667384_0002/\u003c/a\u003e"
+          }
+        ]
+      },
+      "apps": [],
+      "runtimeInfos": {},
+      "progressUpdateIntervalMs": 500,
+      "jobName": "paragraph_1657070556843_1467858627",
+      "id": "paragraph_1657070556843_1467858627",
+      "dateCreated": "2022-07-06 01:22:36.848",
+      "dateStarted": "2022-07-06 02:55:11.100",
+      "dateFinished": "2022-07-06 02:57:34.418",
+      "status": "FINISHED"
+    },
+    {
+      "text": "%md\n### Tách tập train và valid",
+      "user": "anonymous",
+      "dateUpdated": "2022-07-05 16:45:46.209",
+      "progress": 0,
+      "config": {
+        "colWidth": 12.0,
+        "fontSize": 9.0,
+        "enabled": true,
+        "results": {},
+        "editorSetting": {
+          "language": "markdown",
+          "editOnDblClick": true,
+          "completionKey": "TAB",
+          "completionSupport": false
+        },
+        "editorMode": "ace/mode/markdown",
+        "editorHide": true,
+        "tableHide": false
+      },
+      "settings": {
+        "params": {},
+        "forms": {}
+      },
+      "results": {
+        "code": "SUCCESS",
+        "msg": [
+          {
+            "type": "HTML",
+            "data": "\u003cdiv class\u003d\"markdown-body\"\u003e\n\u003ch3\u003eTách tập train và valid\u003c/h3\u003e\n\u003c/div\u003e"
+          }
+        ]
+      },
+      "apps": [],
+      "runtimeInfos": {},
+      "progressUpdateIntervalMs": 500,
+      "jobName": "paragraph_1656285300318_595838026",
+      "id": "paragraph_1656285300318_595838026",
+      "dateCreated": "2022-06-26 23:15:00.318",
+      "dateStarted": "2022-07-05 16:45:46.214",
+      "dateFinished": "2022-07-05 16:45:46.442",
+      "status": "FINISHED"
+    },
+    {
+      "text": "%livy.pyspark\ntf_idf_train \u003d spark.read.format(\"parquet\").option(\"inferSchema\", True).option(\"header\", True).load(\"/data/train/tf_idf\")\ntf_idf_train.show()",
+      "user": "anonymous",
+      "dateUpdated": "2022-07-06 03:57:15.442",
+      "progress": 50,
+      "config": {
+        "tableHide": false,
+        "editorSetting": {
+          "language": "python",
+          "editOnDblClick": false,
+          "completionKey": "TAB",
+          "completionSupport": true
+        },
+        "colWidth": 12.0,
+        "editorMode": "ace/mode/python",
+        "fontSize": 9.0,
+        "editorHide": false,
+        "results": {},
+        "enabled": true
+      },
+      "settings": {
+        "params": {},
+        "forms": {}
+      },
+      "results": {
+        "code": "SUCCESS",
+        "msg": [
+          {
+            "type": "TEXT",
+            "data": "+--------------------+-------------+\n|     tf_idf_features|categoryIndex|\n+--------------------+-------------+\n|(262144,[0,1,2,3,...|         12.0|\n|(262144,[0,1,2,3,...|         12.0|\n|(262144,[0,2,3,4,...|         12.0|\n|(262144,[0,1,2,3,...|         12.0|\n|(262144,[0,1,2,3,...|         12.0|\n|(262144,[0,1,2,3,...|          8.0|\n|(262144,[0,1,2,3,...|          8.0|\n|(262144,[0,1,2,3,...|          8.0|\n|(262144,[0,1,2,3,...|          8.0|\n|(262144,[0,1,2,3,...|          8.0|\n|(262144,[0,1,2,3,...|          8.0|\n|(262144,[0,2,5,8,...|          8.0|\n|(262144,[0,2,3,5,...|          8.0|\n|(262144,[0,1,2,3,...|          8.0|\n|(262144,[0,3,7,9,...|          8.0|\n|(262144,[0,1,2,3,...|         12.0|\n|(262144,[0,1,2,3,...|          8.0|\n|(262144,[0,1,2,4,...|          8.0|\n|(262144,[0,1,2,3,...|          8.0|\n|(262144,[0,1,2,3,...|          8.0|\n+--------------------+-------------+\nonly showing top 20 rows"
+          },
+          {
+            "type": "HTML",
+            "data": "\u003chr/\u003eSpark Application Id: application_1657077287408_0002\u003cbr/\u003eSpark WebUI: \u003ca href\u003d\"http://master:8088/proxy/application_1657077287408_0002/\"\u003ehttp://master:8088/proxy/application_1657077287408_0002/\u003c/a\u003e"
+          }
+        ]
+      },
+      "apps": [],
+      "runtimeInfos": {},
+      "progressUpdateIntervalMs": 500,
+      "jobName": "paragraph_1657076260998_628047728",
+      "id": "paragraph_1657076260998_628047728",
+      "dateCreated": "2022-07-06 02:57:41.007",
+      "dateStarted": "2022-07-06 03:57:15.458",
+      "dateFinished": "2022-07-06 03:57:22.593",
+      "status": "FINISHED"
+    },
+    {
+      "text": "%livy.pyspark\n(train, validate) \u003d tf_idf_train.randomSplit([0.8, 0.2])\ntrain.coalesce(1).write.mode(\"overwrite\").format(\"parquet\").option(\"header\", \"true\").save(\"/data/train/tf_idf_train\")\nvalidate.coalesce(1).write.mode(\"overwrite\").format(\"parquet\").option(\"header\", \"true\").save(\"/data/train/tf_idf_valid\")",
+      "user": "anonymous",
+      "dateUpdated": "2022-07-06 08:53:32.279",
+      "progress": 0,
+      "config": {
+        "editorSetting": {
+          "language": "python",
+          "editOnDblClick": false,
+          "completionKey": "TAB",
+          "completionSupport": true
+        },
+        "colWidth": 12.0,
+        "editorMode": "ace/mode/python",
+        "fontSize": 9.0,
+        "results": {},
+        "enabled": true
+      },
+      "settings": {
+        "params": {},
+        "forms": {}
+      },
+      "apps": [],
+      "runtimeInfos": {},
+      "progressUpdateIntervalMs": 500,
+      "jobName": "paragraph_1657038913219_871794329",
+      "id": "paragraph_1657038913219_871794329",
+      "dateCreated": "2022-07-05 16:35:13.223",
+      "dateStarted": "2022-07-06 08:53:32.315",
+      "dateFinished": "2022-07-06 08:53:33.354",
+      "status": "ERROR"
+    },
+    {
+      "text": "%md\n# Thử nghiệm các mô hình học máy",
+      "user": "anonymous",
+      "dateUpdated": "2022-07-06 03:55:09.959",
+      "progress": 0,
+      "config": {
+        "tableHide": false,
+        "editorSetting": {
+          "language": "markdown",
+          "editOnDblClick": true,
+          "completionKey": "TAB",
+          "completionSupport": false
+        },
+        "colWidth": 12.0,
+        "editorMode": "ace/mode/markdown",
+        "fontSize": 9.0,
+        "editorHide": true,
+        "results": {},
+        "enabled": true
+      },
+      "settings": {
+        "params": {},
+        "forms": {}
+      },
+      "results": {
+        "code": "SUCCESS",
+        "msg": [
+          {
+            "type": "HTML",
+            "data": "\u003cdiv class\u003d\"markdown-body\"\u003e\n\u003ch1\u003eThử nghiệm các mô hình học máy\u003c/h1\u003e\n\u003c/div\u003e"
+          }
+        ]
+      },
+      "apps": [],
+      "runtimeInfos": {},
+      "progressUpdateIntervalMs": 500,
+      "jobName": "paragraph_1657079650366_1252008400",
+      "id": "paragraph_1657079650366_1252008400",
+      "dateCreated": "2022-07-06 03:54:10.374",
+      "dateStarted": "2022-07-06 03:55:09.959",
+      "dateFinished": "2022-07-06 03:55:09.970",
+      "status": "FINISHED"
+    },
+    {
+      "text": "%livy.pyspark\nmodel_path \u003d \"/data/model/\"\ntrain \u003d spark.read.format(\"parquet\").option(\"inferSchema\", True).option(\"header\", True).load(\"/data/train/tf_idf_train\")\nvalidate \u003d spark.read.format(\"parquet\").option(\"inferSchema\", True).option(\"header\", True).load(\"/data/train/tf_idf_valid\")",
+      "user": "anonymous",
+      "dateUpdated": "2022-07-12 10:26:44.309",
+      "progress": 100,
+      "config": {
+        "editorSetting": {
+          "language": "python",
+          "editOnDblClick": false,
+          "completionKey": "TAB",
+          "completionSupport": true
+        },
+        "colWidth": 12.0,
+        "editorMode": "ace/mode/python",
+        "fontSize": 9.0,
+        "results": {},
+        "enabled": true
+      },
+      "settings": {
+        "params": {},
+        "forms": {}
+      },
+      "results": {
+        "code": "SUCCESS",
+        "msg": [
+          {
+            "type": "HTML",
+            "data": "\u003chr/\u003eSpark Application Id: application_1657620948759_0003\u003cbr/\u003eSpark WebUI: \u003ca href\u003d\"http://master:8088/proxy/application_1657620948759_0003/\"\u003ehttp://master:8088/proxy/application_1657620948759_0003/\u003c/a\u003e"
+          }
+        ]
+      },
+      "apps": [],
+      "runtimeInfos": {},
+      "progressUpdateIntervalMs": 500,
+      "jobName": "paragraph_1657080132592_1083974321",
+      "id": "paragraph_1657080132592_1083974321",
+      "dateCreated": "2022-07-06 04:02:12.592",
+      "dateStarted": "2022-07-12 10:26:44.353",
+      "dateFinished": "2022-07-12 10:27:02.924",
+      "status": "FINISHED"
+    },
+    {
+      "text": "%md\n### NaiveBayes",
+      "user": "anonymous",
+      "dateUpdated": "2022-07-06 03:55:24.065",
+      "progress": 0,
+      "config": {
+        "tableHide": false,
+        "editorSetting": {
+          "language": "markdown",
+          "editOnDblClick": true,
+          "completionKey": "TAB",
+          "completionSupport": false
+        },
+        "colWidth": 12.0,
+        "editorMode": "ace/mode/markdown",
+        "fontSize": 9.0,
+        "editorHide": true,
+        "results": {},
+        "enabled": true
+      },
+      "settings": {
+        "params": {},
+        "forms": {}
+      },
+      "results": {
+        "code": "SUCCESS",
+        "msg": [
+          {
+            "type": "HTML",
+            "data": "\u003cdiv class\u003d\"markdown-body\"\u003e\n\u003ch3\u003eNaiveBayes\u003c/h3\u003e\n\u003c/div\u003e"
+          }
+        ]
+      },
+      "apps": [],
+      "runtimeInfos": {},
+      "progressUpdateIntervalMs": 500,
+      "jobName": "paragraph_1657079712542_1725285429",
+      "id": "paragraph_1657079712542_1725285429",
+      "dateCreated": "2022-07-06 03:55:12.542",
+      "dateStarted": "2022-07-06 03:55:24.066",
+      "dateFinished": "2022-07-06 03:55:24.078",
+      "status": "FINISHED"
+    },
+    {
+      "text": "%livy.pyspark\nnb_save \u003d model_path + \"nb_model\"\nnb \u003d NaiveBayes(modelType\u003d\"multinomial\",labelCol\u003d\"categoryIndex\", featuresCol\u003d\"tf_idf_features\")\nnbModel \u003d nb.fit(train)\nnbModel.save(nb_save)",
+      "user": "anonymous",
+      "dateUpdated": "2022-07-06 08:20:27.369",
+      "progress": 100,
+      "config": {
+        "editorSetting": {
+          "language": "python",
+          "editOnDblClick": false,
+          "completionKey": "TAB",
+          "completionSupport": true
+        },
+        "colWidth": 12.0,
+        "editorMode": "ace/mode/python",
+        "fontSize": 9.0,
+        "results": {},
+        "enabled": true
+      },
+      "settings": {
+        "params": {},
+        "forms": {}
+      },
+      "apps": [],
+      "runtimeInfos": {},
+      "progressUpdateIntervalMs": 500,
+      "jobName": "paragraph_1657039793080_1102245042",
+      "id": "paragraph_1657039793080_1102245042",
+      "dateCreated": "2022-07-05 16:49:53.080",
+      "dateStarted": "2022-07-06 08:20:27.397",
+      "dateFinished": "2022-07-06 08:20:31.477",
+      "status": "ABORT"
+    },
+    {
+      "text": "%livy.pyspark\nnb_save \u003d model_path + \"nb_model\"\nnbModel \u003d NaiveBayesModel.load(nb_save)\nnb_predictions \u003d nbModel.transform(validate)\nnb_predictions.show(5)",
+      "user": "anonymous",
+      "dateUpdated": "2022-07-06 08:30:10.008",
+      "progress": 75,
+      "config": {
+        "editorSetting": {
+          "language": "python",
+          "editOnDblClick": false,
+          "completionKey": "TAB",
+          "completionSupport": true
+        },
+        "colWidth": 12.0,
+        "editorMode": "ace/mode/python",
+        "fontSize": 9.0,
+        "results": {},
+        "enabled": true
+      },
+      "settings": {
+        "params": {},
+        "forms": {}
+      },
+      "results": {
+        "code": "SUCCESS",
+        "msg": [
+          {
+            "type": "TEXT",
+            "data": "+--------------------+-------------+--------------------+--------------------+----------+\n|     tf_idf_features|categoryIndex|       rawPrediction|         probability|prediction|\n+--------------------+-------------+--------------------+--------------------+----------+\n|(262144,[0,1,2,3,...|          6.0|[-121601.19292712...|[0.0,0.0,0.0,0.0,...|       6.0|\n|(262144,[0,1,2,3,...|          0.0|[-18456.712833287...|[4.04031733110759...|       8.0|\n|(262144,[0,1,2,3,...|          0.0|[-25538.706712394...|[0.0,0.0,0.0,0.0,...|       6.0|\n|(262144,[0,1,2,3,...|          0.0|[-62984.967543656...|[0.0,0.0,0.0,0.0,...|       9.0|\n|(262144,[0,1,2,3,...|          5.0|[-19987.922344562...|[0.0,0.0,0.0,0.0,...|       5.0|\n+--------------------+-------------+--------------------+--------------------+----------+\nonly showing top 5 rows"
+          },
+          {
+            "type": "HTML",
+            "data": "\u003chr/\u003eSpark Application Id: application_1657096039347_0001\u003cbr/\u003eSpark WebUI: \u003ca href\u003d\"http://master:8088/proxy/application_1657096039347_0001/\"\u003ehttp://master:8088/proxy/application_1657096039347_0001/\u003c/a\u003e"
+          }
+        ]
+      },
+      "apps": [],
+      "runtimeInfos": {},
+      "progressUpdateIntervalMs": 500,
+      "jobName": "paragraph_1657088979506_214477859",
+      "id": "paragraph_1657088979506_214477859",
+      "dateCreated": "2022-07-06 06:29:39.517",
+      "dateStarted": "2022-07-06 08:30:10.043",
+      "dateFinished": "2022-07-06 08:30:22.147",
+      "status": "FINISHED"
+    },
+    {
+      "text": "%livy.pyspark\nevaluator \u003d MulticlassClassificationEvaluator(labelCol\u003d\"categoryIndex\", predictionCol\u003d\"prediction\", metricName\u003d\"accuracy\")\nnb_accuracy \u003d evaluator.evaluate(nb_predictions)\nprint(\"Accuracy of NaiveBayes is \u003d %g\"% (nb_accuracy))",
+      "user": "anonymous",
+      "dateUpdated": "2022-07-06 04:13:20.071",
+      "progress": 62,
+      "config": {
+        "colWidth": 12.0,
+        "fontSize": 9.0,
+        "enabled": true,
+        "results": {},
+        "editorSetting": {
+          "language": "python",
+          "editOnDblClick": false,
+          "completionKey": "TAB",
+          "completionSupport": true
+        },
+        "editorMode": "ace/mode/python"
+      },
+      "settings": {
+        "params": {},
+        "forms": {}
+      },
+      "results": {
+        "code": "SUCCESS",
+        "msg": [
+          {
+            "type": "TEXT",
+            "data": "Accuracy of NaiveBayes is \u003d 0.761065"
+          },
+          {
+            "type": "HTML",
+            "data": "\u003chr/\u003eSpark Application Id: application_1657080591254_0001\u003cbr/\u003eSpark WebUI: \u003ca href\u003d\"http://master:8088/proxy/application_1657080591254_0001/\"\u003ehttp://master:8088/proxy/application_1657080591254_0001/\u003c/a\u003e"
+          }
+        ]
+      },
+      "apps": [],
+      "runtimeInfos": {},
+      "progressUpdateIntervalMs": 500,
+      "jobName": "paragraph_1657040109564_1742553334",
+      "id": "paragraph_1657040109564_1742553334",
+      "dateCreated": "2022-07-05 16:55:09.564",
+      "dateStarted": "2022-07-06 04:13:20.166",
+      "dateFinished": "2022-07-06 04:13:45.403",
+      "status": "FINISHED"
+    },
+    {
+      "text": "%livy.pyspark\nevaluator \u003d MulticlassClassificationEvaluator(labelCol\u003d\"categoryIndex\", predictionCol\u003d\"prediction\", metricName\u003d\"weightedPrecision\")\nnb_precision \u003d evaluator.evaluate(nb_predictions)\nprint(\"Precision of NaiveBayes is \u003d %g\"% (nb_precision))",
+      "user": "anonymous",
+      "dateUpdated": "2022-07-06 08:30:24.754",
+      "progress": 75,
+      "config": {
+        "editorSetting": {
+          "language": "python",
+          "editOnDblClick": false,
+          "completionKey": "TAB",
+          "completionSupport": true
+        },
+        "colWidth": 12.0,
+        "editorMode": "ace/mode/python",
+        "fontSize": 9.0,
+        "results": {},
+        "enabled": true
+      },
+      "settings": {
+        "params": {},
+        "forms": {}
+      },
+      "results": {
+        "code": "SUCCESS",
+        "msg": [
+          {
+            "type": "TEXT",
+            "data": "Precision of NaiveBayes is \u003d 0.787893"
+          },
+          {
+            "type": "HTML",
+            "data": "\u003chr/\u003eSpark Application Id: application_1657096039347_0001\u003cbr/\u003eSpark WebUI: \u003ca href\u003d\"http://master:8088/proxy/application_1657096039347_0001/\"\u003ehttp://master:8088/proxy/application_1657096039347_0001/\u003c/a\u003e"
+          }
+        ]
+      },
+      "apps": [],
+      "runtimeInfos": {},
+      "progressUpdateIntervalMs": 500,
+      "jobName": "paragraph_1657081186355_1580803456",
+      "id": "paragraph_1657081186355_1580803456",
+      "dateCreated": "2022-07-06 04:19:46.355",
+      "dateStarted": "2022-07-06 08:30:24.779",
+      "dateFinished": "2022-07-06 08:30:36.247",
+      "status": "FINISHED"
+    },
+    {
+      "text": "%livy.pyspark\nevaluator \u003d MulticlassClassificationEvaluator(labelCol\u003d\"categoryIndex\", predictionCol\u003d\"prediction\", metricName\u003d\"weightedRecall\")\nnb_recall \u003d evaluator.evaluate(nb_predictions)\nprint(\"Recall of NaiveBayes is \u003d %g\"% (nb_recall))",
+      "user": "anonymous",
+      "dateUpdated": "2022-07-06 08:30:38.873",
+      "progress": 62,
+      "config": {
+        "editorSetting": {
+          "language": "python",
+          "editOnDblClick": false,
+          "completionKey": "TAB",
+          "completionSupport": true
+        },
+        "colWidth": 12.0,
+        "editorMode": "ace/mode/python",
+        "fontSize": 9.0,
+        "results": {},
+        "enabled": true
+      },
+      "settings": {
+        "params": {},
+        "forms": {}
+      },
+      "results": {
+        "code": "SUCCESS",
+        "msg": [
+          {
+            "type": "TEXT",
+            "data": "Recall of NaiveBayes is \u003d 0.761065"
+          },
+          {
+            "type": "HTML",
+            "data": "\u003chr/\u003eSpark Application Id: application_1657096039347_0001\u003cbr/\u003eSpark WebUI: \u003ca href\u003d\"http://master:8088/proxy/application_1657096039347_0001/\"\u003ehttp://master:8088/proxy/application_1657096039347_0001/\u003c/a\u003e"
+          }
+        ]
+      },
+      "apps": [],
+      "runtimeInfos": {},
+      "progressUpdateIntervalMs": 500,
+      "jobName": "paragraph_1657081235566_236660640",
+      "id": "paragraph_1657081235566_236660640",
+      "dateCreated": "2022-07-06 04:20:35.566",
+      "dateStarted": "2022-07-06 08:30:38.917",
+      "dateFinished": "2022-07-06 08:30:46.496",
+      "status": "FINISHED"
+    },
+    {
+      "text": "%livy.pyspark\nevaluator \u003d MulticlassClassificationEvaluator(labelCol\u003d\"categoryIndex\", predictionCol\u003d\"prediction\", metricName\u003d\"f1\")\nnb_f1 \u003d evaluator.evaluate(nb_predictions)\nprint(\"F1 score of NaiveBayes is \u003d %g\"% (nb_f1))",
+      "user": "anonymous",
+      "dateUpdated": "2022-07-06 04:17:18.222",
+      "progress": 75,
+      "config": {
+        "colWidth": 12.0,
+        "fontSize": 9.0,
+        "enabled": true,
+        "results": {},
+        "editorSetting": {
+          "language": "python",
+          "editOnDblClick": false,
+          "completionKey": "TAB",
+          "completionSupport": true
+        },
+        "editorMode": "ace/mode/python"
+      },
+      "settings": {
+        "params": {},
+        "forms": {}
+      },
+      "results": {
+        "code": "SUCCESS",
+        "msg": [
+          {
+            "type": "TEXT",
+            "data": "F1 score of NaiveBayes is \u003d 0.766075"
+          },
+          {
+            "type": "HTML",
+            "data": "\u003chr/\u003eSpark Application Id: application_1657080591254_0001\u003cbr/\u003eSpark WebUI: \u003ca href\u003d\"http://master:8088/proxy/application_1657080591254_0001/\"\u003ehttp://master:8088/proxy/application_1657080591254_0001/\u003c/a\u003e"
+          }
+        ]
+      },
+      "apps": [],
+      "runtimeInfos": {},
+      "progressUpdateIntervalMs": 500,
+      "jobName": "paragraph_1657041529505_240350810",
+      "id": "paragraph_1657041529505_240350810",
+      "dateCreated": "2022-07-05 17:18:49.515",
+      "dateStarted": "2022-07-06 04:17:18.250",
+      "dateFinished": "2022-07-06 04:17:26.385",
+      "status": "FINISHED"
+    },
+    {
+      "text": "%md\n# Áp dụng lên tập test",
+      "user": "anonymous",
+      "dateUpdated": "2022-07-10 14:52:16.407",
+      "progress": 0,
+      "config": {
+        "colWidth": 12.0,
+        "fontSize": 9.0,
+        "enabled": true,
+        "results": {},
+        "editorSetting": {
+          "language": "markdown",
+          "editOnDblClick": true,
+          "completionKey": "TAB",
+          "completionSupport": false
+        },
+        "editorMode": "ace/mode/markdown",
+        "editorHide": true,
+        "tableHide": false
+      },
+      "settings": {
+        "params": {},
+        "forms": {}
+      },
+      "results": {
+        "code": "SUCCESS",
+        "msg": [
+          {
+            "type": "HTML",
+            "data": "\u003cdiv class\u003d\"markdown-body\"\u003e\n\u003ch1\u003eÁp dụng lên tập test\u003c/h1\u003e\n\u003c/div\u003e"
+          }
+        ]
+      },
+      "apps": [],
+      "runtimeInfos": {},
+      "progressUpdateIntervalMs": 500,
+      "jobName": "paragraph_1657379133232_2098059167",
+      "id": "paragraph_1657379133232_2098059167",
+      "dateCreated": "2022-07-09 15:05:33.232",
+      "dateStarted": "2022-07-10 14:52:16.405",
+      "dateFinished": "2022-07-10 14:52:16.416",
+      "status": "FINISHED"
+    },
+    {
+      "text": "%md\n### Naive Bayes",
+      "user": "anonymous",
+      "dateUpdated": "2022-07-12 09:49:05.364",
+      "progress": 0,
+      "config": {
+        "tableHide": false,
+        "editorSetting": {
+          "language": "markdown",
+          "editOnDblClick": true,
+          "completionKey": "TAB",
+          "completionSupport": false
+        },
+        "colWidth": 12.0,
+        "editorMode": "ace/mode/markdown",
+        "fontSize": 9.0,
+        "editorHide": true,
+        "results": {},
+        "enabled": true
+      },
+      "settings": {
+        "params": {},
+        "forms": {}
+      },
+      "results": {
+        "code": "SUCCESS",
+        "msg": [
+          {
+            "type": "HTML",
+            "data": "\u003cdiv class\u003d\"markdown-body\"\u003e\n\u003ch3\u003eNaive Bayes\u003c/h3\u003e\n\u003c/div\u003e"
+          }
+        ]
+      },
+      "apps": [],
+      "runtimeInfos": {},
+      "progressUpdateIntervalMs": 500,
+      "jobName": "paragraph_1657619333870_1288211735",
+      "id": "paragraph_1657619333870_1288211735",
+      "dateCreated": "2022-07-12 09:48:53.870",
+      "dateStarted": "2022-07-12 09:49:05.365",
+      "dateFinished": "2022-07-12 09:49:07.765",
+      "status": "FINISHED"
+    },
+    {
+      "text": "%livy.pyspark\ntest_df \u003d spark.read.format(\"csv\").option(\"inferSchema\", True).option(\"header\", True).option(\"delimiter\",\"\\t\").load(\"/data/test/test_raw\")\nindexer \u003d StringIndexerModel.load(model_path + \"string_indexer\")\nindexed \u003d indexer.transform(test_df)\n\nfullContents \u003d indexed.select(concat_ws(\u0027 \u0027, indexed.Title, indexed.Summary, indexed.Contents).alias(\"fullContents\"), \"Category\", \"categoryIndex\")\nonly_str \u003d fullContents.withColumn(\"only_str\",regexp_replace(col(\u0027fullContents\u0027), \u0027\\d+|“|”\u0027, \u0027\u0027))\nonly_letter \u003d only_str.withColumn(\"only_letter\",regexp_replace(col(\u0027only_str\u0027), \u0027\\\\p{Punct}\u0027, \u0027\u0027)) \nregex_tokenizer \u003d RegexTokenizer(inputCol\u003d\"only_letter\", outputCol\u003d\"words\")\nraw_words \u003d regex_tokenizer.transform(only_letter)\n\nloadedCv \u003d CountVectorizerModel.load(model_path + \"/count_vectorizer\")\ncountVectorizer_train \u003d loadedCv.transform(raw_words)\nidfModel \u003d IDFModel.load(model_path + \"/idf\")\ntf_idf_test \u003d idfModel.transform(countVectorizer_train)\n\nnb_save \u003d model_path + \"nb_model\"\nnbModel \u003d NaiveBayesModel.load(nb_save)\nnb_predictions \u003d nbModel.transform(tf_idf_test)\nnb_predictions.show(5)",
+      "user": "anonymous",
+      "dateUpdated": "2022-07-10 16:17:30.144",
+      "progress": 94,
+      "config": {
+        "editorSetting": {
+          "language": "python",
+          "editOnDblClick": false,
+          "completionKey": "TAB",
+          "completionSupport": true
+        },
+        "colWidth": 12.0,
+        "editorMode": "ace/mode/python",
+        "fontSize": 9.0,
+        "results": {},
+        "enabled": true
+      },
+      "settings": {
+        "params": {},
+        "forms": {}
+      },
+      "results": {
+        "code": "SUCCESS",
+        "msg": [
+          {
+            "type": "TEXT",
+            "data": "+--------------------+--------+-------------+--------------------+--------------------+--------------------+--------------------+--------------------+--------------------+--------------------+----------+\n|        fullContents|Category|categoryIndex|            only_str|         only_letter|               words|            features|     tf_idf_features|       rawPrediction|         probability|prediction|\n+--------------------+--------+-------------+--------------------+--------------------+--------------------+--------------------+--------------------+--------------------+--------------------+----------+\n|Hỗ trợ người lao ...| Thời sự|          8.0|Hỗ trợ người lao ...|Hỗ trợ người lao ...|[hỗ, trợ, người, ...|(262144,[0,1,2,3,...|(262144,[0,1,2,3,...|[-10939.582751288...|[0.0,0.0,0.0,0.0,...|       8.0|\n|Đưa Hải Phòng trở...| Thời sự|          8.0|Đưa Hải Phòng trở...|Đưa Hải Phòng trở...|[đưa, hải, phòng,...|(262144,[0,1,2,3,...|(262144,[0,1,2,3,...|[-7780.4990075850...|[0.0,0.0,0.0,0.0,...|       8.0|\n|Lần đầu tiên Bến ...| Thời sự|          8.0|Lần đầu tiên Bến ...|Lần đầu tiên Bến ...|[lần, đầu, tiên, ...|(262144,[0,1,2,3,...|(262144,[0,1,2,3,...|[-3907.4648183448...|[1.53636895226385...|       8.0|\n|Ninh Thuận có tân...| Thời sự|          8.0|Ninh Thuận có tân...|Ninh Thuận có tân...|[ninh, thuận, có,...|(262144,[0,2,3,5,...|(262144,[0,2,3,5,...|[-3009.8589367826...|[6.89783796206293...|       8.0|\n|Báo cáo Chính phủ...| Thời sự|          8.0|Báo cáo Chính phủ...|Báo cáo Chính phủ...|[báo, cáo, chính,...|(262144,[0,1,2,3,...|(262144,[0,1,2,3,...|[-7869.2669592778...|[0.0,0.0,0.0,0.0,...|       8.0|\n+--------------------+--------+-------------+--------------------+--------------------+--------------------+--------------------+--------------------+--------------------+--------------------+----------+\nonly showing top 5 rows"
+          },
+          {
+            "type": "HTML",
+            "data": "\u003chr/\u003eSpark Application Id: application_1657468101080_0002\u003cbr/\u003eSpark WebUI: \u003ca href\u003d\"http://master:8088/proxy/application_1657468101080_0002/\"\u003ehttp://master:8088/proxy/application_1657468101080_0002/\u003c/a\u003e"
+          }
+        ]
+      },
+      "apps": [],
+      "runtimeInfos": {},
+      "progressUpdateIntervalMs": 500,
+      "jobName": "paragraph_1657464736404_208905569",
+      "id": "paragraph_1657464736404_208905569",
+      "dateCreated": "2022-07-10 14:52:16.405",
+      "dateStarted": "2022-07-10 16:17:30.211",
+      "dateFinished": "2022-07-10 16:17:44.336",
+      "status": "FINISHED"
+    },
+    {
+      "text": "%livy.pyspark\nevaluator \u003d MulticlassClassificationEvaluator(labelCol\u003d\"categoryIndex\", predictionCol\u003d\"prediction\", metricName\u003d\"accuracy\")\nnb_accuracy \u003d evaluator.evaluate(nb_predictions)\nprint(\"Accuracy of NaiveBayes in Test set is \u003d %g\"% (nb_accuracy))",
+      "user": "anonymous",
+      "dateUpdated": "2022-07-10 16:19:41.603",
+      "progress": 62,
+      "config": {
+        "editorSetting": {
+          "language": "python",
+          "editOnDblClick": false,
+          "completionKey": "TAB",
+          "completionSupport": true
+        },
+        "colWidth": 12.0,
+        "editorMode": "ace/mode/python",
+        "fontSize": 9.0,
+        "results": {},
+        "enabled": true
+      },
+      "settings": {
+        "params": {},
+        "forms": {}
+      },
+      "results": {
+        "code": "SUCCESS",
+        "msg": [
+          {
+            "type": "TEXT",
+            "data": "Accuracy of NaiveBayes in Test set is \u003d 0.719695"
+          },
+          {
+            "type": "HTML",
+            "data": "\u003chr/\u003eSpark Application Id: application_1657468101080_0002\u003cbr/\u003eSpark WebUI: \u003ca href\u003d\"http://master:8088/proxy/application_1657468101080_0002/\"\u003ehttp://master:8088/proxy/application_1657468101080_0002/\u003c/a\u003e"
+          }
+        ]
+      },
+      "apps": [],
+      "runtimeInfos": {},
+      "progressUpdateIntervalMs": 500,
+      "jobName": "paragraph_1657469797336_1530771928",
+      "id": "paragraph_1657469797336_1530771928",
+      "dateCreated": "2022-07-10 16:16:37.337",
+      "dateStarted": "2022-07-10 16:19:41.652",
+      "dateFinished": "2022-07-10 16:20:15.924",
+      "status": "FINISHED"
+    },
+    {
+      "text": "%md\n### Logistic Regression",
+      "user": "anonymous",
+      "dateUpdated": "2022-07-12 09:49:59.430",
+      "progress": 0,
+      "config": {
+        "tableHide": false,
+        "editorSetting": {
+          "language": "markdown",
+          "editOnDblClick": true,
+          "completionKey": "TAB",
+          "completionSupport": false
+        },
+        "colWidth": 12.0,
+        "editorMode": "ace/mode/markdown",
+        "fontSize": 9.0,
+        "editorHide": true,
+        "results": {},
+        "enabled": true
+      },
+      "settings": {
+        "params": {},
+        "forms": {}
+      },
+      "results": {
+        "code": "SUCCESS",
+        "msg": [
+          {
+            "type": "HTML",
+            "data": "\u003cdiv class\u003d\"markdown-body\"\u003e\n\u003ch3\u003eLogistic Regression\u003c/h3\u003e\n\u003c/div\u003e"
+          }
+        ]
+      },
+      "apps": [],
+      "runtimeInfos": {},
+      "progressUpdateIntervalMs": 500,
+      "jobName": "paragraph_1657619368618_1430772785",
+      "id": "paragraph_1657619368618_1430772785",
+      "dateCreated": "2022-07-12 09:49:28.618",
+      "dateStarted": "2022-07-12 09:49:59.434",
+      "dateFinished": "2022-07-12 09:49:59.509",
+      "status": "FINISHED"
+    },
+    {
+      "text": "%livy.pyspark\ntest_df \u003d spark.read.format(\"csv\").option(\"inferSchema\", True).option(\"header\", True).option(\"delimiter\",\"\\t\").load(\"/data/test/test_raw\")\nindexer \u003d StringIndexerModel.load(model_path + \"string_indexer\")\nindexed \u003d indexer.transform(test_df)\n\nfullContents \u003d indexed.select(concat_ws(\u0027 \u0027, indexed.Title, indexed.Summary, indexed.Contents).alias(\"fullContents\"), \"Category\", \"categoryIndex\")\nonly_str \u003d fullContents.withColumn(\"only_str\",regexp_replace(col(\u0027fullContents\u0027), \u0027\\d+|“|”\u0027, \u0027\u0027))\nonly_letter \u003d only_str.withColumn(\"only_letter\",regexp_replace(col(\u0027only_str\u0027), \u0027\\\\p{Punct}\u0027, \u0027\u0027)) \nregex_tokenizer \u003d RegexTokenizer(inputCol\u003d\"only_letter\", outputCol\u003d\"words\")\nraw_words \u003d regex_tokenizer.transform(only_letter)\n\nloadedCv \u003d CountVectorizerModel.load(model_path + \"/count_vectorizer\")\ncountVectorizer_train \u003d loadedCv.transform(raw_words)\nidfModel \u003d IDFModel.load(model_path + \"/idf\")\ntf_idf_test \u003d idfModel.transform(countVectorizer_train)\n\nlr_save \u003d model_path + \"lr_model\"\nlrModel \u003d LogisticRegressionModel.load(lr_save)\nlr_predictions \u003d lrModel.transform(tf_idf_test)\nlr_predictions.show(5)",
+      "user": "anonymous",
+      "dateUpdated": "2022-07-12 10:26:48.959",
+      "progress": 94,
+      "config": {
+        "colWidth": 12.0,
+        "fontSize": 9.0,
+        "enabled": true,
+        "results": {},
+        "editorSetting": {
+          "language": "python",
+          "editOnDblClick": false,
+          "completionKey": "TAB",
+          "completionSupport": true
+        },
+        "editorMode": "ace/mode/python"
+      },
+      "settings": {
+        "params": {},
+        "forms": {}
+      },
+      "results": {
+        "code": "SUCCESS",
+        "msg": [
+          {
+            "type": "TEXT",
+            "data": "+--------------------+--------+-------------+--------------------+--------------------+--------------------+--------------------+--------------------+--------------------+--------------------+----------+\n|        fullContents|Category|categoryIndex|            only_str|         only_letter|               words|            features|     tf_idf_features|       rawPrediction|         probability|prediction|\n+--------------------+--------+-------------+--------------------+--------------------+--------------------+--------------------+--------------------+--------------------+--------------------+----------+\n|Hỗ trợ người lao ...| Thời sự|          8.0|Hỗ trợ người lao ...|Hỗ trợ người lao ...|[hỗ, trợ, người, ...|(262144,[0,1,2,3,...|(262144,[0,1,2,3,...|[2.41615323401068...|[1.35525323396821...|       8.0|\n|Đưa Hải Phòng trở...| Thời sự|          8.0|Đưa Hải Phòng trở...|Đưa Hải Phòng trở...|[đưa, hải, phòng,...|(262144,[0,1,2,3,...|(262144,[0,1,2,3,...|[3.81709821665486...|[8.48015546487255...|       8.0|\n|Lần đầu tiên Bến ...| Thời sự|          8.0|Lần đầu tiên Bến ...|Lần đầu tiên Bến ...|[lần, đầu, tiên, ...|(262144,[0,1,2,3,...|(262144,[0,1,2,3,...|[5.55339686266071...|[0.08235876395962...|       8.0|\n|Ninh Thuận có tân...| Thời sự|          8.0|Ninh Thuận có tân...|Ninh Thuận có tân...|[ninh, thuận, có,...|(262144,[0,2,3,5,...|(262144,[0,2,3,5,...|[4.34847417099689...|[0.10030145459250...|       8.0|\n|Báo cáo Chính phủ...| Thời sự|          8.0|Báo cáo Chính phủ...|Báo cáo Chính phủ...|[báo, cáo, chính,...|(262144,[0,1,2,3,...|(262144,[0,1,2,3,...|[4.51202802231729...|[5.40367143570125...|       8.0|\n+--------------------+--------+-------------+--------------------+--------------------+--------------------+--------------------+--------------------+--------------------+--------------------+----------+\nonly showing top 5 rows"
+          },
+          {
+            "type": "HTML",
+            "data": "\u003chr/\u003eSpark Application Id: application_1657620948759_0003\u003cbr/\u003eSpark WebUI: \u003ca href\u003d\"http://master:8088/proxy/application_1657620948759_0003/\"\u003ehttp://master:8088/proxy/application_1657620948759_0003/\u003c/a\u003e"
+          }
+        ]
+      },
+      "apps": [],
+      "runtimeInfos": {},
+      "progressUpdateIntervalMs": 500,
+      "jobName": "paragraph_1657469981651_1453010013",
+      "id": "paragraph_1657469981651_1453010013",
+      "dateCreated": "2022-07-10 16:19:41.651",
+      "dateStarted": "2022-07-12 10:26:58.977",
+      "dateFinished": "2022-07-12 10:27:24.161",
+      "status": "FINISHED"
+    },
+    {
+      "text": "%livy.pyspark\nevaluator \u003d MulticlassClassificationEvaluator(labelCol\u003d\"categoryIndex\", predictionCol\u003d\"prediction\", metricName\u003d\"accuracy\")\nlr_accuracy \u003d evaluator.evaluate(lr_predictions)\nprint(\"Accuracy of Logistic Regression in Test set is \u003d %g\"% (lr_accuracy))",
+      "user": "anonymous",
+      "dateUpdated": "2022-07-12 10:26:50.639",
+      "progress": 50,
+      "config": {
+        "editorSetting": {
+          "language": "python",
+          "editOnDblClick": false,
+          "completionKey": "TAB",
+          "completionSupport": true
+        },
+        "colWidth": 12.0,
+        "editorMode": "ace/mode/python",
+        "fontSize": 9.0,
+        "results": {},
+        "enabled": true
+      },
+      "settings": {
+        "params": {},
+        "forms": {}
+      },
+      "results": {
+        "code": "SUCCESS",
+        "msg": [
+          {
+            "type": "TEXT",
+            "data": "Accuracy of Logistic Regression in Test set is \u003d 0.75917"
+          },
+          {
+            "type": "HTML",
+            "data": "\u003chr/\u003eSpark Application Id: application_1657620948759_0003\u003cbr/\u003eSpark WebUI: \u003ca href\u003d\"http://master:8088/proxy/application_1657620948759_0003/\"\u003ehttp://master:8088/proxy/application_1657620948759_0003/\u003c/a\u003e"
+          }
+        ]
+      },
+      "apps": [],
+      "runtimeInfos": {},
+      "progressUpdateIntervalMs": 500,
+      "jobName": "paragraph_1657619499078_222153211",
+      "id": "paragraph_1657619499078_222153211",
+      "dateCreated": "2022-07-12 09:51:39.079",
+      "dateStarted": "2022-07-12 10:27:03.084",
+      "dateFinished": "2022-07-12 10:28:02.466",
+      "status": "FINISHED"
+    },
+    {
+      "text": "%livy.pyspark\n",
+      "user": "anonymous",
+      "dateUpdated": "2022-07-12 09:54:51.075",
+      "progress": 0,
+      "config": {},
+      "settings": {
+        "params": {},
+        "forms": {}
+      },
+      "apps": [],
+      "runtimeInfos": {},
+      "progressUpdateIntervalMs": 500,
+      "jobName": "paragraph_1657619691075_20765624",
+      "id": "paragraph_1657619691075_20765624",
+      "dateCreated": "2022-07-12 09:54:51.075",
+      "status": "READY"
+    }
+  ],
+  "name": "training_model",
+  "id": "2H9FCD2AU",
+  "defaultInterpreterGroup": "spark",
+  "version": "0.9.0",
+  "noteParams": {},
+  "noteForms": {},
+  "angularObjects": {},
+  "config": {
+    "isZeppelinNotebookCronEnable": false
+  },
+  "info": {}
+}

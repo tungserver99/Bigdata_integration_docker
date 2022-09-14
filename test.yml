@@ -1,0 +1,114 @@
+version: "3.7"
+services:
+
+  master:
+    image: hadoop-spark
+    container_name: master
+    hostname: master
+    environment:
+      HADOOP_NODE: namenode
+      HIVE_CONFIGURE: yes, please
+      SPARK_LOCAL_HOSTNAME: master
+    expose:
+      - 1-65535
+    ports:
+      # Spark Master Web UI
+      - 8080:8080
+      # Spark job Web UI: increments for each successive job
+      - 4040:4040
+      - 4041:4041
+      - 4042:4042
+      - 4043:4043
+      # Spark History server
+      - 18080:18080
+      # YARN UI
+      - 8088:8088
+      - 8188:8188
+      - 19888:19888
+      # Hadoop namenode UI
+      - 9870:9870
+      # Hadoop secondary namenode UI
+      - 9868:9868
+    volumes:
+      - ./data:/data
+
+  worker1:
+    image: hadoop-spark
+    container_name: worker1
+    hostname: worker1
+    environment:
+      SPARK_MASTER_ADDRESS: spark://master:7077
+      SPARK_WORKER_PORT: 8881
+      SPARK_WORKER_WEBUI_PORT: 8081
+      SPARK_LOCAL_HOSTNAME: worker1
+      HADOOP_NODE: datanode
+    expose:
+      - 1-65535
+    ports:
+      # Hadoop datanode UI
+      - 9864:9864
+      #Spark worker UI
+      - 8081:8081
+    volumes:
+      - ./data:/data
+
+  worker2:
+    image: hadoop-spark
+    container_name: worker2
+    hostname: worker2
+    environment:
+      SPARK_MASTER_ADDRESS: spark://master:7077
+      SPARK_WORKER_PORT: 8882
+      SPARK_WORKER_WEBUI_PORT: 8082
+      SPARK_LOCAL_HOSTNAME: worker2
+      HADOOP_NODE: datanode
+      HADOOP_DATANODE_UI_PORT: 9865
+    expose:
+      - 1-65535
+    ports:
+      # Hadoop datanode UI
+      - 9865:9865
+      # Spark worker UI
+      - 8082:8082
+    volumes:
+      - ./data:/data
+
+  livy:
+    image: panovvv/livy:2.5.2
+    container_name: livy
+    hostname: livy
+    depends_on:
+      - master
+      - worker1
+      - worker2
+    volumes:
+      - ./livy_batches:/livy_batches
+      - ./data:/data
+    environment:
+      - SPARK_MASTER=yarn
+      - LOCAL_DIR_WHITELIST=/data/batches/
+      - ENABLE_HIVE_CONTEXT=false
+    expose:
+      - 1-65535
+    ports:
+      - 8998:8998
+
+  zeppelin:
+    image: panovvv/zeppelin-bigdata:2.5.2
+    container_name: zeppelin
+    hostname: zeppelin
+    depends_on:
+      - master
+      - worker1
+      - worker2
+      - livy
+    volumes:
+      - ./zeppelin_notebooks:/zeppelin_notebooks
+      - ./data:/data
+    environment:
+      ZEPPELIN_PORT: 8890
+      ZEPPELIN_NOTEBOOK_DIR: '/zeppelin_notebooks'
+    expose:
+      - 8890
+    ports:
+      - 8890:8890
